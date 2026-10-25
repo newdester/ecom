@@ -4,7 +4,7 @@ import { rateLimit, sendRateHeaders } from './_lib/rate-limit.js';
 const product = {
   id: 'chefpro-2l',
   title: 'Triturador Elétrico ChefPro 2L Bivolt + Tábua de Madeira Grátis',
-  unitPrice: 137.9
+  unitPrice: 89.9
 };
 
 const quantityFrom = value => Math.min(10, Math.max(1, Number.parseInt(value, 10) || 1));

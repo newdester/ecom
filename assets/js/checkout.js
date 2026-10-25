@@ -3,6 +3,7 @@
   if (!cart) { location.replace('carrinho.html'); return; }
   const $ = selector => document.querySelector(selector);
   const total = cart.price * cart.quantity;
+  if (!sessionStorage.getItem('meta_initiate_checkout')) { Storefront.track('InitiateCheckout', cart, { value: Number(total.toFixed(2)), num_items: cart.quantity }); sessionStorage.setItem('meta_initiate_checkout', '1'); }
   const delivery = 'Frete grátis · entrega estimada de 5 a 7 dias corridos';
   $('#checkoutItem').innerHTML = `<div class="cart-line"><img src="${cart.image}" alt="${cart.title}"><div><p class="cart-name">${cart.title}</p><span class="cart-meta">Quantidade: ${cart.quantity}</span></div><b class="cart-price">${Storefront.brl(total)}</b></div>`;
   $('#checkoutTotal').textContent = Storefront.brl(total);
@@ -41,7 +42,7 @@
     const mp = new MercadoPago(config.publicKey, { locale: 'pt-BR' });
     const settings = { initialization: { amount: Number(total.toFixed(2)), payer: { email: customer.email, identification: { type: 'CPF', number: customer.cpf.replace(/\D/g, '') } } }, customization: { paymentMethods: { creditCard: 'all', debitCard: 'all', bankTransfer: 'all', ticket: 'all', mercadoPago: 'all' } }, callbacks: {
       onReady: () => {}, onError: error => { console.error(error); status('Não foi possível carregar um método de pagamento. Confira as credenciais e tente novamente.'); },
-      onSubmit: ({ formData }) => new Promise((resolve, reject) => fetch('/api/process_payment', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ formData, quantity: cart.quantity, customer }) }).then(response => response.json().then(data => ({ ok: response.ok, data }))).then(({ ok, data }) => { if (!ok) { status(data.cause || data.error || 'Pagamento não aprovado.'); reject(); return; } sessionStorage.setItem(Storefront.PAYMENT, JSON.stringify(data)); resolve(); location.assign('obrigado.html'); }).catch(() => { status('Falha de conexão. Tente novamente.'); reject(); }))
+      onSubmit: ({ formData }) => new Promise((resolve, reject) => { Storefront.track('AddPaymentInfo', cart, { value: Number(total.toFixed(2)), num_items: cart.quantity }); fetch('/api/process_payment', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ formData, quantity: cart.quantity, customer }) }).then(response => response.json().then(data => ({ ok: response.ok, data }))).then(({ ok, data }) => { if (!ok) { status(data.cause || data.error || 'Pagamento não aprovado.'); reject(); return; } sessionStorage.setItem(Storefront.PAYMENT, JSON.stringify(data)); resolve(); location.assign('obrigado.html'); }).catch(() => { status('Falha de conexão. Tente novamente.'); reject(); }); })
     }};
     controller = await mp.bricks().create('payment', 'paymentBrick_container', settings);
   }
