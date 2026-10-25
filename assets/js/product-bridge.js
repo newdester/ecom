@@ -17,13 +17,10 @@
     if (root) {
       root.querySelectorAll('.price').forEach(price => { price.textContent = 'R$ 89,90'; price.dataset.price = '8990'; });
       root.querySelectorAll('.discount__percentage').forEach(discount => { discount.lastChild.nodeValue = '64%'; });
-      const installment = root.querySelector('#parcela-8695262085295');
-      if (installment) installment.textContent = 'R$ 14,98';
       const installmentCopy = root.querySelector('.parcelamento');
-      if (installmentCopy) {
-        const label = Array.from(installmentCopy.childNodes).find(node => node.nodeType === Node.TEXT_NODE && /até/.test(node.nodeValue));
-        if (label) label.nodeValue = 'em até 6x de ';
-      }
+      // O Brick é a fonte de verdade para o valor exato de cada parcela.
+      // Assim evitamos anunciar uma divisão com arredondamento diferente.
+      if (installmentCopy) installmentCopy.textContent = 'Até 12x sem juros no cartão';
     }
     replaceText(document.body, 'Prazo de envio de 2 a 5 dias', 'Entrega estimada de 5 a 7 dias corridos');
     replaceText(document.body, 'Aceitamos Cartão, PIX e Boleto.', 'Aceitamos cartão de crédito, Pix e saldo Mercado Pago.');
@@ -32,7 +29,7 @@
     if (paymentOptions) {
       const note = document.createElement('p');
       note.className = 'product-payment-note';
-      note.textContent = `Até 6x sem juros no cartão · R$ ${pixPrice.toFixed(2).replace('.', ',')} no Pix`;
+      note.textContent = `Até 12x sem juros no cartão · R$ ${pixPrice.toFixed(2).replace('.', ',')} no Pix`;
       note.style.margin = '0 0 12px';
       note.style.fontSize = '14px';
       note.style.fontWeight = '600';
