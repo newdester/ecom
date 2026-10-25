@@ -1,0 +1,34 @@
+const META_ENDPOINT = pixelId => `https://graph.facebook.com/${pixelId}/events`;
+
+export async function sendMetaPurchase(payment) {
+  const pixelId = process.env.META_PIXEL_ID;
+  const accessToken = process.env.META_ACCESS_TOKEN;
+  if (!pixelId || !accessToken || payment.status !== 'approved') return { sent: false };
+  const quantity = Math.max(1, Number(payment.metadata?.quantity) || 1);
+  const value = Number(payment.transaction_amount);
+  const eventId = `mp_payment_${payment.id}`;
+  const event = {
+    event_name: 'Purchase',
+    event_time: Math.floor(Date.now() / 1000),
+    event_id: eventId,
+    action_source: 'website',
+    event_source_url: String(process.env.PUBLIC_BASE_URL || '').replace(/\/$/, ''),
+    custom_data: {
+      currency: String(payment.currency_id || 'BRL'),
+      value,
+      content_type: 'product',
+      content_ids: ['chefpro-2l'],
+      contents: [{ id: 'chefpro-2l', quantity, item_price: Number((value / quantity).toFixed(2)) }]
+    }
+  };
+  try {
+    const response = await fetch(META_ENDPOINT(pixelId), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: [event], access_token: accessToken })
+    });
+    return { sent: response.ok, eventId };
+  } catch {
+    return { sent: false, eventId };
+  }
+}

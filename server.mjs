@@ -64,7 +64,7 @@ async function processPayment(req, res) {
 
 http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
-  if (req.method === 'GET' && url.pathname === '/api/config') return reply(res, 200, { publicKey: config.publicKey, paymentEnabled: Boolean(config.accessToken && config.publicKey), product });
+  if (req.method === 'GET' && url.pathname === '/api/config') return reply(res, 200, { publicKey: config.publicKey, paymentEnabled: Boolean(config.accessToken && config.publicKey), metaCapiEnabled: Boolean(env.META_PIXEL_ID && env.META_ACCESS_TOKEN), product });
   if (req.method === 'POST' && url.pathname === '/api/process_payment') return processPayment(req, res);
   if (req.method === 'POST' && url.pathname === '/api/mercadopago/webhook') {
     const quota = allowRequest(req, 'webhook', 120, 60_000); applyRate(res, quota);

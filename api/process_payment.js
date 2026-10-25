@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { rateLimit, sendRateHeaders } from './_lib/rate-limit.js';
+import { sendMetaPurchase } from './_lib/meta-capi.js';
 
 const product = {
   id: 'chefpro-2l',
@@ -50,13 +51,15 @@ export default async function handler(request, response) {
     });
     const payment = await mpResponse.json();
     if (!mpResponse.ok) return response.status(422).json({ error: payment.message || 'O pagamento não foi autorizado.', cause: payment.cause?.[0]?.description || null });
+    const meta = await sendMetaPurchase(payment);
     return response.status(200).json({
       orderId,
       paymentId: payment.id,
       status: payment.status,
       statusDetail: payment.status_detail,
       amount: payload.transaction_amount,
-      pix: payment.point_of_interaction?.transaction_data || null
+      pix: payment.point_of_interaction?.transaction_data || null,
+      metaEventId: meta.eventId || `mp_payment_${payment.id}`
     });
   } catch {
     return response.status(502).json({ error: 'Não foi possível comunicar com o provedor de pagamento.' });

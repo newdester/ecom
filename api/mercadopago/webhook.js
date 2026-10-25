@@ -1,5 +1,6 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { rateLimit, sendRateHeaders } from '../_lib/rate-limit.js';
+import { sendMetaPurchase } from '../_lib/meta-capi.js';
 
 const header = (request, name) => String(request.headers[name] || '');
 
@@ -21,12 +22,17 @@ function signatureIsValid(request) {
   }
 }
 
-export default function handler(request, response) {
+export default async function handler(request, response) {
   if (request.method !== 'POST') return response.status(405).end();
   const quota = rateLimit(request, 'webhook', { limit: 120, windowMs: 60_000 });
   sendRateHeaders(response, quota);
   if (!quota.allowed) return response.status(429).json({ error: 'Limite de notificações excedido.' });
   if (!signatureIsValid(request)) return response.status(401).json({ error: 'Assinatura de webhook inválida.' });
-  // Confirme o pagamento consultando a API por data.id antes de alterar pedido/estoque.
+  const paymentId = request.query?.['data.id'] || request.body?.data?.id;
+  if (!paymentId || !process.env.MP_ACCESS_TOKEN) return response.status(200).json({ received: true });
+  try {
+    const paymentResponse = await fetch(`https://api.mercadopago.com/v1/payments/${encodeURIComponent(paymentId)}`, { headers: { Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}` } });
+    if (paymentResponse.ok) await sendMetaPurchase(await paymentResponse.json());
+  } catch { /* Confirmação ao Mercado Pago não deve depender do Meta. */ }
   return response.status(200).json({ received: true });
 }
