@@ -1,5 +1,15 @@
 {
   "cleanUrls": true,
+  "redirects": [
+    { "source": "/cart", "destination": "/carrinho", "permanent": false },
+    { "source": "/cart/(.*)", "destination": "/carrinho", "permanent": false },
+    { "source": "/a/checkout", "destination": "/checkout", "permanent": false },
+    { "source": "/collections/(.*)", "destination": "/", "permanent": false },
+    { "source": "/products/(.*)", "destination": "/", "permanent": false },
+    { "source": "/pages/(.*)", "destination": "/", "permanent": false },
+    { "source": "/account/(.*)", "destination": "/", "permanent": false },
+    { "source": "/customer_authentication/(.*)", "destination": "/", "permanent": false }
+  ],
   "headers": [
     {
       "source": "/assets/(.*)",

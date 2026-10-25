@@ -2755,6 +2755,7 @@ none;
 
   document.addEventListener('mouseenter', function(e){
     if (!mqDesktop.matches) return;
+    if (!(e.target instanceof Element)) return;
     const item = e.target.closest('.xmega__item.has-children');
     if (!item) return;
     const fly = item.querySelector('.xmega__flyout');
@@ -20308,7 +20309,7 @@ window.atualizarParcelamento = function(variant, scope = document){
 
 
             <script src="https://cdn.shopify.com/storefront/standard-actions.js" type="module" data-source-attribution="shopify.standard_actions"></script>
-            <script src="assets/js/product-bridge.js"></script>
+            <script src="assets/js/product-bridge.js?v=20261025-2"></script>
 </body>
 </html>
 
@@ -21005,7 +21006,7 @@ window.atualizarParcelamento = function(variant, scope = document){
 
         xhr.open('POST', url);
         xhr.onreadystatechange = function () {
-            if (xhr.readyState > 3 && xhr.status == 200) { success(xhr.responseText); }
+            if (xhr.readyState > 3 && xhr.status == 200 && typeof success === 'function') { success(xhr.responseText); }
         };
         xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         xhr.setRequestHeader('Content-Type', 'application/json');
