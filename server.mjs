@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const env = Object.fromEntries((await readFile(path.join(root, '.env'), 'utf8').catch(() => '')).split(/\r?\n/).map(line => line.trim()).filter(line => line && !line.startsWith('#')).map(line => { const i = line.indexOf('='); return [line.slice(0, i), line.slice(i + 1)]; }));
-const config = { publicKey: env.MP_PUBLIC_KEY || '', accessToken: env.MP_ACCESS_TOKEN || '' };
+const config = { publicKey: env.MP_PUBLIC_KEY || '', accessToken: env.MP_ACCESS_TOKEN || '', publicBaseUrl: String(env.PUBLIC_BASE_URL || '').replace(/\/$/, '') };
 const product = { id: 'chefpro-2l', title: 'Triturador Elétrico ChefPro 2L Bivolt + Tábua de Madeira Grátis', unitPrice: 137.90, currency: 'BRL' };
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.webp': 'image/webp', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml' };
 const reply = (res, status, body) => { res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(body)); };
@@ -33,6 +33,7 @@ async function processPayment(req, res) {
       metadata: { product_id: product.id, quantity, customer_name: String(body.customer?.name || '').slice(0, 120) }
     };
     Object.keys(payload).forEach(key => payload[key] === undefined && delete payload[key]);
+    if (config.publicBaseUrl) payload.notification_url = `${config.publicBaseUrl}/api/mercadopago/webhook`;
     const mpResponse = await fetch('https://api.mercadopago.com/v1/payments', { method: 'POST', headers: { Authorization: `Bearer ${config.accessToken}`, 'Content-Type': 'application/json', 'X-Idempotency-Key': randomUUID() }, body: JSON.stringify(payload) });
     const payment = await mpResponse.json();
     if (!mpResponse.ok) return reply(res, 422, { error: payment.message || 'O pagamento não foi autorizado.', cause: payment.cause?.[0]?.description || null });

@@ -7,6 +7,7 @@ const product = {
 };
 
 const quantityFrom = value => Math.min(10, Math.max(1, Number.parseInt(value, 10) || 1));
+const baseUrl = () => String(process.env.PUBLIC_BASE_URL || '').replace(/\/$/, '');
 
 export default async function handler(request, response) {
   if (request.method !== 'POST') return response.status(405).json({ error: 'Método não permitido.' });
@@ -28,7 +29,9 @@ export default async function handler(request, response) {
     external_reference: orderId,
     metadata: { product_id: product.id, quantity, customer_name: String(customer.name || '').slice(0, 120) }
   };
-  if (payload.issuer_id === undefined) delete payload.issuer_id;
+  // Cartão gera token; alguns meios (como Pix) não o utilizam.
+  Object.keys(payload).forEach(key => payload[key] === undefined && delete payload[key]);
+  if (baseUrl()) payload.notification_url = `${baseUrl()}/api/mercadopago/webhook`;
 
   try {
     const mpResponse = await fetch('https://api.mercadopago.com/v1/payments', {
