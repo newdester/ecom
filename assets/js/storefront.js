@@ -1,3 +1,8 @@
+const responsiveCss = document.createElement('link');
+responsiveCss.rel = 'stylesheet';
+responsiveCss.href = 'assets/css/responsive.css';
+document.head.append(responsiveCss);
+
 const Storefront = (() => {
   const CART = 'chefpro_cart_v1', CUSTOMER = 'chefpro_customer_v1', PAYMENT = 'chefpro_payment_v1';
   const brl = value => Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });

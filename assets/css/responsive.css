@@ -1,0 +1,39 @@
+/* Camada responsiva compartilhada: carrinho, checkout e confirmação. */
+html { scroll-behavior: smooth; }
+img { max-width: 100%; }
+button, a, input { touch-action: manipulation; }
+.button, .quantity button, .remove, .icon-link { min-height: 44px; }
+.field input { font-size: 16px; }
+.field input:focus-visible, .button:focus-visible, .quantity button:focus-visible,
+.remove:focus-visible, .icon-link:focus-visible, .header-link:focus-visible { outline: 3px solid #000; outline-offset: 3px; }
+.button:disabled { cursor: wait; opacity: .65; }
+.payment-intro { border-left: 3px solid #000; }
+.status { border-left: 3px solid #9b1c1c; }
+.summary { position: sticky; top: 20px; }
+@media (max-width: 760px) {
+  body { overflow-x: hidden; }
+  .announcement { padding-left: max(14px, env(safe-area-inset-left)); padding-right: max(14px, env(safe-area-inset-right)); line-height: 1.35; }
+  .site-header__inner { padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+  .main-title { font-size: 23px; }
+  .panel { padding-top: 17px; }
+  .field { margin-top: 14px; }
+  .field input { height: 48px; }
+  .summary { position: static; padding: 20px; }
+  .cart-line { align-items: start; }
+  .cart-price { margin-top: 3px; }
+  .quantity { height: 44px; margin-top: 14px; }
+  .quantity button { width: 42px; height: 42px; }
+  .remove { margin-left: 5px; font-size: 12px; }
+  .footer { padding-bottom: max(25px, env(safe-area-inset-bottom)); }
+  .success { padding-top: 5px; }
+  .pix-box img { width: min(190px, 100%); height: auto; }
+}
+@media (min-width: 761px) and (max-width: 1024px) {
+  .site-header__inner { padding: 0 26px; }
+  .container { width: min(100% - 48px, 1180px); }
+  .layout { grid-template-columns: minmax(0, 1fr) 320px; gap: 30px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
