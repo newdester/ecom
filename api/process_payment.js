@@ -22,6 +22,10 @@ export default async function handler(request, response) {
   const quantity = quantityFrom(requestedQuantity);
   const email = String(formData.payer?.email || '').trim();
   if (!formData.payment_method_id || !/^\S+@\S+\.\S+$/.test(email)) return response.status(422).json({ error: 'Dados de pagamento incompletos.' });
+  const allowedPaymentTypes = new Set(['credit_card', 'bank_transfer', 'account_money']);
+  if (formData.payment_type_id && !allowedPaymentTypes.has(formData.payment_type_id)) {
+    return response.status(422).json({ error: 'Este meio de pagamento não está disponível para esta compra.' });
+  }
 
   const orderId = `CP-${Date.now()}-${randomUUID().slice(0, 8)}`;
   const payload = {

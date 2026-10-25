@@ -22,10 +22,13 @@ export async function sendMetaPurchase(payment) {
     }
   };
   try {
+    const body = { data: [event], access_token: accessToken };
+    // Permite que eventos de servidor apareçam em Eventos de teste sem expor o código no cliente.
+    if (process.env.META_TEST_EVENT_CODE) body.test_event_code = process.env.META_TEST_EVENT_CODE;
     const response = await fetch(META_ENDPOINT(pixelId), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ data: [event], access_token: accessToken })
+      body: JSON.stringify(body)
     });
     return { sent: response.ok, eventId };
   } catch {
