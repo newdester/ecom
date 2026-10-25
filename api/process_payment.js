@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { rateLimit, sendRateHeaders } from './_lib/rate-limit.js';
 
 const product = {
   id: 'chefpro-2l',
@@ -11,11 +12,15 @@ const baseUrl = () => String(process.env.PUBLIC_BASE_URL || '').replace(/\/$/, '
 
 export default async function handler(request, response) {
   if (request.method !== 'POST') return response.status(405).json({ error: 'Método não permitido.' });
+  const quota = rateLimit(request, 'payment', { limit: 5, windowMs: 60_000 });
+  sendRateHeaders(response, quota);
+  if (!quota.allowed) return response.status(429).json({ error: 'Muitas tentativas. Aguarde um minuto antes de tentar novamente.' });
   if (!process.env.MP_ACCESS_TOKEN || !process.env.MP_PUBLIC_KEY) return response.status(503).json({ error: 'Pagamento ainda não configurado.' });
 
   const { formData = {}, quantity: requestedQuantity, customer = {} } = request.body || {};
   const quantity = quantityFrom(requestedQuantity);
-  if (!formData.payment_method_id || !formData.payer?.email) return response.status(422).json({ error: 'Dados de pagamento incompletos.' });
+  const email = String(formData.payer?.email || '').trim();
+  if (!formData.payment_method_id || !/^\S+@\S+\.\S+$/.test(email)) return response.status(422).json({ error: 'Dados de pagamento incompletos.' });
 
   const orderId = `CP-${Date.now()}-${randomUUID().slice(0, 8)}`;
   const payload = {
@@ -25,7 +30,7 @@ export default async function handler(request, response) {
     installments: Number(formData.installments) || 1,
     payment_method_id: formData.payment_method_id,
     issuer_id: formData.issuer_id,
-    payer: formData.payer,
+    payer: { ...formData.payer, email },
     external_reference: orderId,
     metadata: { product_id: product.id, quantity, customer_name: String(customer.name || '').slice(0, 120) }
   };

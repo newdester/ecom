@@ -1,4 +1,5 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
+import { rateLimit, sendRateHeaders } from '../_lib/rate-limit.js';
 
 const header = (request, name) => String(request.headers[name] || '');
 
@@ -22,6 +23,9 @@ function signatureIsValid(request) {
 
 export default function handler(request, response) {
   if (request.method !== 'POST') return response.status(405).end();
+  const quota = rateLimit(request, 'webhook', { limit: 120, windowMs: 60_000 });
+  sendRateHeaders(response, quota);
+  if (!quota.allowed) return response.status(429).json({ error: 'Limite de notificações excedido.' });
   if (!signatureIsValid(request)) return response.status(401).json({ error: 'Assinatura de webhook inválida.' });
   // Confirme o pagamento consultando a API por data.id antes de alterar pedido/estoque.
   return response.status(200).json({ received: true });
