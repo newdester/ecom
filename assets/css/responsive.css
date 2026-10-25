@@ -7,6 +7,12 @@ button, a, input { touch-action: manipulation; }
 .field input:focus-visible, .button:focus-visible, .quantity button:focus-visible,
 .remove:focus-visible, .icon-link:focus-visible, .header-link:focus-visible { outline: 3px solid #000; outline-offset: 3px; }
 .button:disabled { cursor: wait; opacity: .65; }
+.field input { border-radius: 10px; }
+.button { border-radius: 10px; }
+.summary, .payment-intro, .status { border-radius: 12px; }
+.delivery-promise, .field-feedback { margin: 14px 0 0; font-size: 12px; line-height: 1.5; color: #4b4b4b; }
+.delivery-promise { border-top: 1px solid #d5d5d5; padding-top: 14px; font-weight: 700; color: #111; }
+.field-feedback { min-height: 18px; }
 .payment-intro { border-left: 3px solid #000; }
 .status { border-left: 3px solid #9b1c1c; }
 .summary { position: sticky; top: 20px; }
