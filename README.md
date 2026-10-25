@@ -17,6 +17,8 @@ O checkout usa o **Payment Brick** do Mercado Pago para cartão e Pix. Os campos
 
 ## Antes de produção
 
+- No Vercel, importe o repositório `newdester/ecom`, selecione a branch `main` e mantenha o diretório raiz como `./`.
+- Em **Settings → Environment Variables**, cadastre `MP_PUBLIC_KEY` e `MP_ACCESS_TOKEN`; não as coloque em arquivos do projeto.
 - Use uma URL pública com HTTPS em `PUBLIC_BASE_URL`.
 - Configure uma notificação (webhook) do Mercado Pago apontando para `/api/mercadopago/webhook` e implemente a validação de assinatura no ambiente de hospedagem.
 - Troque as chaves de teste pelas chaves de produção somente depois de concluir uma compra de teste aprovada.
