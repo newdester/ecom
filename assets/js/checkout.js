@@ -5,7 +5,10 @@
   const $ = selector => document.querySelector(selector);
   const total = Storefront.totalFor(cart);
   if (!sessionStorage.getItem('meta_initiate_checkout')) { Storefront.track('InitiateCheckout', cart, { value: Number(total.toFixed(2)), num_items: cart.quantity }); sessionStorage.setItem('meta_initiate_checkout', '1'); }
-  const delivery = 'Frete grátis · entrega estimada de 5 a 7 dias corridos';
+  let savedShipping = null;
+  try { savedShipping = JSON.parse(localStorage.getItem('motorscent_shipping_v1') || 'null'); } catch {}
+  const destination = savedShipping?.city && savedShipping?.state ? ` para ${savedShipping.city} / ${savedShipping.state}` : '';
+  const delivery = `Frete grátis${destination} · entrega estimada de 8 a 11 dias corridos`;
   $('#checkoutItem').innerHTML = `<div class="cart-line"><img src="${cart.image}" alt="${cart.title}"><div><p class="cart-name">${cart.title}</p><span class="cart-meta">Quantidade: ${cart.quantity}</span></div><b class="cart-price">${Storefront.brl(total)}</b></div>`;
   $('#checkoutTotal').textContent = Storefront.brl(total);
   document.querySelector('.summary').insertAdjacentHTML('beforeend', `<p class="delivery-promise">${delivery}</p>`);
@@ -49,5 +52,6 @@
   }
   $('#customerForm').addEventListener('submit', async event => { event.preventDefault(); const form = event.currentTarget; if (!form.checkValidity()) { form.reportValidity(); return; } const customer = Object.fromEntries(new FormData(form).entries()); ['name', 'email', 'phone', 'cpf', 'zip', 'address', 'number', 'complement', 'district', 'city'].forEach(key => customer[key] = $(`#${key}`).value.trim()); localStorage.setItem(Storefront.CUSTOMER, JSON.stringify(customer)); form.classList.add('hidden'); $('#paymentArea').classList.remove('hidden'); $('#paymentArea').scrollIntoView({ behavior: 'smooth', block: 'start' }); await renderBrick(customer); });
   try { const customer = JSON.parse(localStorage.getItem(Storefront.CUSTOMER) || '{}'); Object.entries(customer).forEach(([key, value]) => { const field = document.querySelector(`#${key}`); if (field) field.value = value; }); } catch {}
+  if (!$('#zip').value && savedShipping?.zip) { $('#zip').value = savedShipping.zip; fillAddressFromZip(); }
   window.addEventListener('pagehide', () => controller?.unmount?.());
 })();

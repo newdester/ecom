@@ -17,6 +17,20 @@ main > section:not(:first-child),
   line-height: 1.45;
 }
 
+.motorscent-shipping-estimator { margin: 18px 0; padding: 16px; border: 1px solid #d8d8d8; border-radius: 5px; color: #1d1d1d; }
+.motorscent-shipping-estimator h2 { margin: 0 0 12px; font-size: 14px; font-weight: 700; }
+.motorscent-shipping-form { display: flex; gap: 8px; }
+.motorscent-shipping-form input { min-width: 0; flex: 1; height: 42px; padding: 0 12px; border: 1px solid #a9a9a9; border-radius: 3px; font: inherit; }
+.motorscent-shipping-form button { min-height: 42px; padding: 0 16px; border: 0; border-radius: 3px; background: #111; color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+.motorscent-shipping-form button:disabled { opacity: .65; cursor: progress; }
+.motorscent-shipping-message { min-height: 1.4em; margin: 11px 0 0; font-size: 13px; font-weight: 600; }
+.motorscent-shipping-results { margin-top: 12px; font-size: 13px; }
+.motorscent-shipping-results table { width: 100%; border-collapse: collapse; }
+.motorscent-shipping-results th, .motorscent-shipping-results td { padding: 9px 6px; border: 1px solid #e2e2e2; text-align: center; }
+.motorscent-shipping-results th { background: #f6f6f6; }
+.motorscent-shipping-results td:last-child strong { color: #168a5b; }
+.motorscent-shipping-results p { margin: 10px 0 0; color: #555; font-size: 12px; }
+
 @media screen and (max-width: 749px) {
   .page-width,
   .page-width-desktop { padding-left: 16px !important; padding-right: 16px !important; }
@@ -44,6 +58,9 @@ main > section:not(:first-child),
   .quantity-breaks-container,
   .quantity-breaks { display: grid !important; grid-template-columns: 1fr !important; gap: 10px !important; }
   .quantity-break { min-height: 0 !important; padding: 13px !important; }
+  .motorscent-shipping-form { flex-direction: column; }
+  .motorscent-shipping-form button { width: 100%; }
+  .motorscent-shipping-results { overflow-x: auto; }
 
   .thumbnail-slider,
   .slider-mobile-gutter .slider { overflow-x: auto; scrollbar-width: thin; scroll-snap-type: x mandatory; }

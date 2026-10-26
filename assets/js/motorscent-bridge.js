@@ -130,7 +130,42 @@
     note.textContent = 'Pagamento seguro via Mercado Pago: Pix, cartão e saldo da carteira. As opções de parcelamento e eventuais juros aparecem antes da confirmação.';
     form.append(note);
   };
-  document.addEventListener('DOMContentLoaded', () => { document.documentElement.lang = 'pt-BR'; translate(document.body); optimizeImages(); addPaymentNote(); updateOffer(); document.querySelectorAll('[name="quantity"]').forEach(input => input.addEventListener('change', updateOffer)); }, { once: true });
+  const addShippingEstimator = () => {
+    if (document.querySelector('#motorscent-shipping-estimator')) return;
+    const form = document.querySelector('form[action*="cart/add"], form.shopify-product-form');
+    if (!form) return;
+    const section = document.createElement('section');
+    section.id = 'motorscent-shipping-estimator';
+    section.className = 'motorscent-shipping-estimator';
+    section.innerHTML = `<h2>Calcule o frete e o prazo de entrega</h2><div class="motorscent-shipping-form"><label class="visually-hidden" for="motorscent-zip">CEP</label><input id="motorscent-zip" inputmode="numeric" autocomplete="postal-code" maxlength="9" placeholder="Digite seu CEP"><button type="button">Calcular</button></div><p class="motorscent-shipping-message" aria-live="polite"></p><div class="motorscent-shipping-results" hidden><table><thead><tr><th>Entrega</th><th>Prazo</th><th>Preço</th></tr></thead><tbody><tr><td><strong>Padrão</strong></td><td>8 a 11 dias</td><td><strong>Grátis</strong></td></tr><tr><td><strong>Expresso</strong></td><td>5 a 7 dias</td><td><strong>R$ 9,79</strong></td></tr></tbody></table><p>O frete padrão grátis será aplicado no checkout.</p></div>`;
+    form.after(section);
+    const input = section.querySelector('input');
+    const button = section.querySelector('button');
+    const message = section.querySelector('.motorscent-shipping-message');
+    const results = section.querySelector('.motorscent-shipping-results');
+    const calculate = async () => {
+      const zip = input.value.replace(/\D/g, '');
+      input.value = zip.replace(/(\d{5})(\d)/, '$1-$2');
+      results.hidden = true;
+      if (zip.length !== 8) { message.textContent = 'Informe um CEP válido com 8 números.'; return; }
+      button.disabled = true; message.textContent = 'Calculando opções de entrega…';
+      try {
+        const response = await fetch(`https://viacep.com.br/ws/${zip}/json/`);
+        const address = await response.json();
+        if (!response.ok || address.erro) throw new Error('CEP inválido');
+        const location = [address.localidade, address.uf].filter(Boolean).join(' / ');
+        message.textContent = `Entrega para ${location}.`;
+        results.hidden = false;
+        localStorage.setItem('motorscent_shipping_v1', JSON.stringify({ zip, city: address.localidade || '', state: address.uf || '', method: 'standard' }));
+      } catch {
+        message.textContent = 'Não encontramos esse CEP. Revise e tente novamente.';
+      } finally { button.disabled = false; }
+    };
+    input.addEventListener('input', () => { input.value = input.value.replace(/\D/g, '').slice(0, 8).replace(/(\d{5})(\d)/, '$1-$2'); if (input.value.replace(/\D/g, '').length === 8) calculate(); });
+    button.addEventListener('click', calculate);
+    try { const saved = JSON.parse(localStorage.getItem('motorscent_shipping_v1') || 'null'); if (saved?.zip) { input.value = saved.zip.replace(/(\d{5})(\d)/, '$1-$2'); calculate(); } } catch {}
+  };
+  document.addEventListener('DOMContentLoaded', () => { document.documentElement.lang = 'pt-BR'; translate(document.body); optimizeImages(); addPaymentNote(); addShippingEstimator(); updateOffer(); document.querySelectorAll('[name="quantity"]').forEach(input => input.addEventListener('change', updateOffer)); }, { once: true });
   document.addEventListener('submit', goToCheckout, true);
   document.addEventListener('click', event => { const link = event.target instanceof Element && event.target.closest('a[href*="/cart"], a[href*="/checkout"]'); if (!link) return; event.preventDefault(); const form = document.querySelector('form[action*="cart/add"], form.shopify-product-form'); if (form) goToCheckout({ target: form, preventDefault() {}, stopImmediatePropagation() {} }); }, true);
 })();
