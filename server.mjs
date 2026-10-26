@@ -27,7 +27,11 @@ const validWebhook = (req, url, body) => {
   const expected = createHmac('sha256', config.webhookSecret).update(`id:${dataId};request-id:${requestId};ts:${values.ts};`).digest('hex');
   try { return timingSafeEqual(Buffer.from(expected), Buffer.from(values.v1)); } catch { return false; }
 };
-const product = { id: 'chefpro-2l', title: 'Triturador Elétrico ChefPro 2L Bivolt + Tábua de Madeira Grátis', unitPrice: 89.90, currency: 'BRL' };
+const products = {
+  'chefpro-2l': { id: 'chefpro-2l', title: 'Triturador Elétrico ChefPro 2L Bivolt + Tábua de Madeira Grátis', unitPrice: 89.90, currency: 'BRL' },
+  'motor-scent': { id: 'motor-scent', title: 'Motor Scent — Umidificador Automotivo', unitPrice: 139.90, currency: 'BRL' }
+};
+const priceFor = (product, quantity) => product.id === 'motor-scent' ? (quantity === 1 ? 139.90 : quantity === 2 ? 129.90 : 99.90) : product.unitPrice;
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.webp': 'image/webp', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml' };
 const reply = (res, status, body) => { res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(body)); };
 const readBody = req => new Promise((resolve, reject) => { let data = ''; req.on('data', chunk => { data += chunk; if (data.length > 300000) req.destroy(); }); req.on('end', () => { try { resolve(JSON.parse(data || '{}')); } catch { reject(new Error('JSON inválido')); } }); req.on('error', reject); });
@@ -40,12 +44,13 @@ async function processPayment(req, res) {
   try {
     const body = await readBody(req);
     const quantity = safeQuantity(body.quantity);
+    const product = products[String(body.productId || 'chefpro-2l')] || products['chefpro-2l'];
     const form = body.formData || {};
     const email = String(form.payer?.email || '').trim();
     if (!form.payment_method_id || !/^\S+@\S+\.\S+$/.test(email)) return reply(res, 422, { error: 'Dados de pagamento incompletos.' });
     const orderId = `CP-${Date.now()}-${randomUUID().slice(0, 8)}`;
     const payload = {
-      transaction_amount: Number((product.unitPrice * quantity).toFixed(2)),
+      transaction_amount: Number((priceFor(product, quantity) * quantity).toFixed(2)),
       token: form.token,
       description: `${product.title} × ${quantity}`,
       installments: Number(form.installments) || 1,
@@ -66,7 +71,7 @@ async function processPayment(req, res) {
 
 http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
-  if (req.method === 'GET' && url.pathname === '/api/config') return reply(res, 200, { publicKey: config.publicKey, paymentEnabled: Boolean(config.accessToken && config.publicKey), metaCapiEnabled: Boolean(env.META_PIXEL_ID && env.META_ACCESS_TOKEN), product });
+  if (req.method === 'GET' && url.pathname === '/api/config') return reply(res, 200, { publicKey: config.publicKey, paymentEnabled: Boolean(config.accessToken && config.publicKey), metaCapiEnabled: Boolean(env.META_PIXEL_ID && env.META_ACCESS_TOKEN), product: products['chefpro-2l'] });
   if (req.method === 'GET' && url.pathname === '/api/admin/overview') {
     const request = { method: req.method, headers: req.headers, socket: req.socket, query: Object.fromEntries(url.searchParams.entries()) };
     const response = { setHeader: (name, value) => res.setHeader(name, value), status(code) { this.code = code; return this; }, json(body) { return reply(res, this.code || 200, body); } };
@@ -79,7 +84,7 @@ http.createServer(async (req, res) => {
     try { const body = await readBody(req); if (!validWebhook(req, url, body)) return reply(res, 401, { error: 'Assinatura de webhook inválida.' }); return reply(res, 200, { received: true }); } catch { return reply(res, 400, { error: 'Corpo inválido.' }); }
   }
   if (req.method !== 'GET' && req.method !== 'HEAD') return reply(res, 405, { error: 'Método não permitido.' });
-  const requestedPath = url.pathname === '/' ? '/index.html' : url.pathname === '/admin' ? '/admin.html' : url.pathname;
+  const requestedPath = url.pathname === '/' ? '/index.html' : url.pathname === '/admin' ? '/admin.html' : url.pathname === '/motorscent' ? '/motorscent.html' : url.pathname;
   const pathname = decodeURIComponent(requestedPath);
   const file = path.resolve(root, `.${pathname}`);
   if (!file.startsWith(root)) return reply(res, 403, { error: 'Acesso negado.' });

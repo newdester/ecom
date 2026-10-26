@@ -2,13 +2,13 @@ import { randomUUID } from 'node:crypto';
 import { rateLimit, sendRateHeaders } from './_lib/rate-limit.js';
 import { sendMetaPurchase } from './_lib/meta-capi.js';
 
-const product = {
-  id: 'chefpro-2l',
-  title: 'Triturador Elétrico ChefPro 2L Bivolt + Tábua de Madeira Grátis',
-  unitPrice: 89.9
+const products = {
+  'chefpro-2l': { id: 'chefpro-2l', title: 'Triturador Elétrico ChefPro 2L Bivolt + Tábua de Madeira Grátis', unitPrice: 89.9 },
+  'motor-scent': { id: 'motor-scent', title: 'Motor Scent — Umidificador Automotivo', unitPrice: 139.9 }
 };
 
 const quantityFrom = value => Math.min(10, Math.max(1, Number.parseInt(value, 10) || 1));
+const priceFor = (product, quantity) => product.id === 'motor-scent' ? (quantity === 1 ? 139.9 : quantity === 2 ? 129.9 : 99.9) : product.unitPrice;
 const baseUrl = () => String(process.env.PUBLIC_BASE_URL || '').replace(/\/$/, '');
 
 export default async function handler(request, response) {
@@ -18,8 +18,9 @@ export default async function handler(request, response) {
   if (!quota.allowed) return response.status(429).json({ error: 'Muitas tentativas. Aguarde um minuto antes de tentar novamente.' });
   if (!process.env.MP_ACCESS_TOKEN || !process.env.MP_PUBLIC_KEY) return response.status(503).json({ error: 'Pagamento ainda não configurado.' });
 
-  const { formData = {}, quantity: requestedQuantity, customer = {} } = request.body || {};
+  const { formData = {}, quantity: requestedQuantity, customer = {}, productId } = request.body || {};
   const quantity = quantityFrom(requestedQuantity);
+  const product = products[String(productId || 'chefpro-2l')] || products['chefpro-2l'];
   const email = String(formData.payer?.email || '').trim();
   if (!formData.payment_method_id || !/^\S+@\S+\.\S+$/.test(email)) return response.status(422).json({ error: 'Dados de pagamento incompletos.' });
   const allowedPaymentTypes = new Set(['credit_card', 'bank_transfer', 'account_money']);
@@ -29,7 +30,7 @@ export default async function handler(request, response) {
 
   const orderId = `CP-${Date.now()}-${randomUUID().slice(0, 8)}`;
   const payload = {
-    transaction_amount: Number((product.unitPrice * quantity).toFixed(2)),
+    transaction_amount: Number((priceFor(product, quantity) * quantity).toFixed(2)),
     token: formData.token,
     description: `${product.title} × ${quantity}`,
     installments: Number(formData.installments) || 1,
