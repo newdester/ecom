@@ -22,6 +22,7 @@
     ['50% OFF LAUNCH SALE', 'OFERTA DE LANÇAMENTO: 50% OFF'], ['SAVE 50%', 'ECONOMIZE 50%'], ['BUNDLE & SAVE', 'COMBO E ECONOMIA'],
     ['Buy 1', 'Compre 1'], ['Buy 2', 'Compre 2'], ['Buy 3', 'Compre 3'], ['BEST VALUE', 'MELHOR OFERTA'], ['MOST POPULAR', 'MAIS POPULAR'],
     ['Built For Car Lovers', 'Feito para quem ama carros'], ['Not Just Another Model On A Shelf', 'Não é apenas mais uma miniatura na estante'],
+    ['Complete your setup', 'Complete seu setup'],
     ['The perfect gift for any car enthusiast', 'O presente perfeito para qualquer apaixonado por carros'],
     ['Real Mist, No Heat', 'Névoa de verdade, sem calor'], ['Quiet Enough For The Bedroom', 'Silencioso para o quarto'],
     ['Realistic headlights & exhaust mist', 'Faróis realistas e névoa pelo escapamento'], ['Night light with attitude', 'Luz noturna cheia de personalidade'],
@@ -44,6 +45,8 @@
     ['Covers loss, theft or damage in transit. We ship a replacement for free.', 'Cobre perda, roubo ou danos no transporte. Enviamos uma reposição gratuitamente.'],
     ['Cart reserved for', 'Carrinho reservado por'], ['Cart • 0 Item', 'Carrinho • 0 item'], ['Your cart is empty', 'Seu carrinho está vazio'],
     ['Continue shopping', 'Continuar comprando'], ['Check out', 'Finalizar compra'], ['Payment methods', 'Formas de pagamento'],
+    ['Skip to content', 'Ir para o conteúdo'], ['Skip to product information', 'Ir para as informações do produto'], ['Slide left', 'Deslizar para a esquerda'], ['Slide right', 'Deslizar para a direita'],
+    ['Previous slide', 'Slide anterior'], ['Next slide', 'Próximo slide'], ['Select a slide to show', 'Selecione um slide para exibir'], ['Go to slide', 'Ir para o slide'],
     ['Regular price', 'Preço normal'], ['Sale price', 'Preço promocional'], ['Unit price', 'Preço unitário'], ['Total amount', 'Valor total'], ['You save', 'Você economiza'],
     ['Product variants', 'Variações do produto'], ['View full details', 'Ver todos os detalhes'], ['Search', 'Buscar'], ['Menu', 'Menu'], ['Home', 'Início'], ['Contact', 'Contato'],
     ['Privacy policy', 'Política de privacidade'], ['Cookie preferences', 'Preferências de cookies'], ['Log in', 'Entrar'], ['Have an account?', 'Já tem uma conta?'], ['Catalog', 'Catálogo'],
@@ -69,8 +72,10 @@
     ['Took the spot between my books. The green paint is exactly like the photos.', 'Ficou no espaço entre meus livros. A pintura verde é exatamente como nas fotos.'],
     ['Two bottles of lavender oil. A few drops in the tank and the exhaust mist smells amazing.', 'Duas garrafas de óleo de lavanda. Algumas gotas no reservatório e a névoa do escapamento fica com um aroma incrível.'],
     ['Was not sure it would look like the photos. The bodywork is cleaner than I expected and the mist with the lights on is the whole show.', 'Não tinha certeza se seria igual às fotos. O acabamento é melhor do que eu esperava e a névoa com as luzes acesas é o grande destaque.'],
+    ['From a Fórmula 1 Red Bull car to a GT3 RS, an RS6, a Ram TRX, a G-Wagon or a desert tank. There is one for every garage.', 'De um Fórmula 1 Red Bull a um GT3 RS, RS6, Ram TRX, G-Wagon ou tanque do deserto. Há um modelo para cada garagem.'],
     ['Ordered', 'Pedido realizado'], ['Shipped', 'Enviado'], ['Delivered', 'Entregue'], ['Processing:', 'Processamento:'], ['Delivery:', 'Entrega:'], ['Tracking:', 'Rastreamento:'],
-    ['sent by email as soon as your order ships', 'enviado por e-mail assim que seu pedido for postado'], ['Every Motor Scent is checked before it leaves the warehouse.', 'Todo Motor Scent é revisado antes de sair do estoque.']
+    ['sent by email as soon as your order ships', 'enviado por e-mail assim que seu pedido for postado'], ['Every Motor Scent is checked before it leaves the warehouse.', 'Todo Motor Scent é revisado antes de sair do estoque.'],
+    ['Customer photo', 'Foto de cliente'], ['Load image', 'Carregar imagem'], ['in gallery view', 'na galeria'], ['Free', 'Grátis'], ['Protection', 'Proteção']
   ]);
   const translate = root => {
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: node => /^(SCRIPT|STYLE)$/i.test(node.parentElement?.tagName) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
@@ -91,7 +96,9 @@
       const caption = card.querySelector('.quantity-break__caption'); if (caption) caption.textContent = `${brl(tier)} por unidade`;
       const price = card.querySelector('.quantity-break__price'); if (price) price.textContent = brl(cardTotal);
       const compare = card.querySelector('.quantity-break__compare-price'); if (compare) compare.style.display = 'none';
+      const benefit = card.querySelector('.quantity-break__benefit'); if (benefit) benefit.textContent = 'Frete grátis';
     });
+    document.querySelectorAll('[data-handle="shipping-protection"] .upsell__title, [data-handle="shipping-protection"] h3, [data-handle="shipping-protection"] h4').forEach(element => { element.textContent = 'Proteção de envio'; });
     let note = document.querySelector('#motorscent-local-offer');
     if (!note) { note = document.createElement('p'); note.id = 'motorscent-local-offer'; note.style.cssText = 'font-weight:700;margin:12px 0;color:#111'; const anchor = document.querySelector('form[action*="cart/add"], form.shopify-product-form'); anchor?.prepend(note); }
     if (note) note.textContent = quantity === 1 ? '1 unidade por R$ 139,90' : quantity === 2 ? '2 unidades por R$ 129,90 cada' : `${quantity} unidades por R$ 99,90 cada`;
