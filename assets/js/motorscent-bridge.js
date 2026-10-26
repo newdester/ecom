@@ -113,8 +113,9 @@
     if (!note) { note = document.createElement('p'); note.id = 'motorscent-local-offer'; note.style.cssText = 'font-weight:700;margin:12px 0;color:#111'; const anchor = document.querySelector('form[action*="cart/add"], form.shopify-product-form'); anchor?.prepend(note); }
     if (note) note.textContent = quantity === 1 ? '1 unidade por R$ 139,90' : quantity === 2 ? '2 unidades por R$ 129,90 cada' : `${quantity} unidades por R$ 99,90 cada`;
   };
-  const goToCheckout = event => {
-    const form = event.target instanceof Element ? event.target.closest('form[action*="cart/add"], form.shopify-product-form') : null;
+  const goToCheckout = (event, destination = '/carrinho') => {
+    const target = event.target instanceof Element ? event.target : null;
+    const form = target?.closest('form[action*="cart/add"], form.shopify-product-form') || target?.form || (target?.getAttribute('form') && document.getElementById(target.getAttribute('form')));
     if (!form) return;
     event.preventDefault(); event.stopImmediatePropagation();
     const quantity = Math.min(10, Math.max(1, Number(form.querySelector('[name="quantity"]')?.value || 1)));
@@ -122,7 +123,7 @@
     const lavenderOil = document.querySelector('[data-handle="lavender-oil"]')?.dataset.selected === 'true';
     localStorage.setItem('chefpro_cart_v1', JSON.stringify({ id: 'motor-scent', title: `Motor Scent — ${selectedVariant()}`, image: selectedImage(), quantity, price: unit, extras: { lavenderOil } }));
     trackMotor('AddToCart', { value: Number((unit * quantity + (lavenderOil ? 20 : 0)).toFixed(2)), contents: [{ id: 'motor-scent', quantity }] });
-    location.assign('/carrinho');
+    location.assign(destination);
   };
   const optimizeImages = () => {
     const images = [...document.images];
@@ -219,5 +220,12 @@
   };
   document.addEventListener('DOMContentLoaded', () => { document.documentElement.lang = 'pt-BR'; translate(document.body); optimizeImages(); trackMotor('ViewContent'); syncSelectedModel(); configureLavenderUpsell(); addPaymentNote(); addShippingEstimator(); updateOffer(); document.querySelectorAll('[name="quantity"]').forEach(input => input.addEventListener('change', updateOffer)); document.querySelectorAll('input[name="Model"]').forEach(input => input.addEventListener('change', syncSelectedModel)); }, { once: true });
   document.addEventListener('submit', goToCheckout, true);
+  document.addEventListener('click', event => {
+    const button = event.target instanceof Element && event.target.closest('#ProductSubmitButton-template--30990084735359__main, [id^="SectionAtcBtn-"], [id^="ProductSubmitButton-"], .shopify-payment-button button, [data-shopify="payment-button"]');
+    if (!button) return;
+    event.preventDefault(); event.stopImmediatePropagation();
+    const isBuyNow = /buy it now|comprar agora/i.test(button.textContent || '') || button.matches('.shopify-payment-button button, [data-shopify="payment-button"]');
+    goToCheckout({ target: button, preventDefault() {}, stopImmediatePropagation() {} }, isBuyNow ? '/checkout' : '/carrinho');
+  }, true);
   document.addEventListener('click', event => { const anchor = event.target instanceof Element && event.target.closest('a[href]'); if (anchor?.href) withPixel(() => window.MetaPixel?.trackCustom('LinkClick', { link_url: anchor.href, link_text: anchor.textContent.trim().slice(0, 120) })); const link = anchor?.matches('a[href*="/cart"], a[href*="/checkout"]') && anchor; if (!link) return; event.preventDefault(); const form = document.querySelector('form[action*="cart/add"], form.shopify-product-form'); if (form) goToCheckout({ target: form, preventDefault() {}, stopImmediatePropagation() {} }); }, true);
 })();
