@@ -28,7 +28,7 @@ const validWebhook = (req, url, body) => {
   try { return timingSafeEqual(Buffer.from(expected), Buffer.from(values.v1)); } catch { return false; }
 };
 const products = {
-  'chefpro-2l': { id: 'chefpro-2l', title: 'Triturador Elétrico ChefPro 2L Bivolt + Tábua de Madeira Grátis', unitPrice: 89.90, currency: 'BRL' },
+  'chefpro-2l': { id: 'chefpro-2l', title: 'Triturador Elétrico ChefPro 2L Bivolt + Tábua de Madeira Grátis', unitPrice: 49.90, currency: 'BRL' },
   'motor-scent': { id: 'motor-scent', title: 'Motor Scent — Umidificador Automotivo', unitPrice: 139.90, currency: 'BRL' }
 };
 const priceFor = (product, quantity) => product.id === 'motor-scent' ? (quantity === 1 ? 139.90 : quantity === 2 ? 129.90 : 99.90) : product.unitPrice;
@@ -36,6 +36,13 @@ const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
 const reply = (res, status, body) => { res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(body)); };
 const readBody = req => new Promise((resolve, reject) => { let data = ''; req.on('data', chunk => { data += chunk; if (data.length > 300000) req.destroy(); }); req.on('end', () => { try { resolve(JSON.parse(data || '{}')); } catch { reject(new Error('JSON inválido')); } }); req.on('error', reject); });
 const safeQuantity = value => Math.min(10, Math.max(1, Number.parseInt(value, 10) || 1));
+const safePaymentStatus = async paymentId => {
+  if (!config.accessToken || !/^\d+$/.test(String(paymentId))) return null;
+  const response = await fetch(`https://api.mercadopago.com/v1/payments/${encodeURIComponent(paymentId)}`, { headers: { Authorization: `Bearer ${config.accessToken}` } });
+  if (!response.ok) return null;
+  const payment = await response.json();
+  return String(payment.external_reference || '').startsWith('CP-') ? payment : null;
+};
 
 async function processPayment(req, res) {
   const quota = allowRequest(req, 'payment', 5, 60_000); applyRate(res, quota);
@@ -74,6 +81,15 @@ async function processPayment(req, res) {
 http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
   if (req.method === 'GET' && url.pathname === '/api/config') return reply(res, 200, { publicKey: config.publicKey, paymentEnabled: Boolean(config.accessToken && config.publicKey), metaCapiEnabled: Boolean(env.META_PIXEL_ID && env.META_ACCESS_TOKEN), product: products['chefpro-2l'] });
+  if (req.method === 'GET' && url.pathname === '/api/payment-status') {
+    const quota = allowRequest(req, 'payment-status', 30, 60_000); applyRate(res, quota);
+    if (!quota.allowed) return reply(res, 429, { error: 'Muitas consultas. Aguarde alguns instantes.' });
+    try {
+      const payment = await safePaymentStatus(url.searchParams.get('paymentId'));
+      if (!payment) return reply(res, 404, { error: 'Pagamento não encontrado.' });
+      return reply(res, 200, { paymentId: payment.id, status: payment.status, statusDetail: payment.status_detail, amount: payment.transaction_amount, pix: payment.point_of_interaction?.transaction_data || null });
+    } catch { return reply(res, 502, { error: 'Não foi possível consultar o pagamento.' }); }
+  }
   if (req.method === 'GET' && url.pathname === '/api/admin/overview') {
     const request = { method: req.method, headers: req.headers, socket: req.socket, query: Object.fromEntries(url.searchParams.entries()) };
     const response = { setHeader: (name, value) => res.setHeader(name, value), status(code) { this.code = code; return this; }, json(body) { return reply(res, this.code || 200, body); } };

@@ -3,7 +3,7 @@ import { rateLimit, sendRateHeaders } from './_lib/rate-limit.js';
 import { sendMetaPurchase } from './_lib/meta-capi.js';
 
 const products = {
-  'chefpro-2l': { id: 'chefpro-2l', title: 'Triturador Elétrico ChefPro 2L Bivolt + Tábua de Madeira Grátis', unitPrice: 89.9 },
+  'chefpro-2l': { id: 'chefpro-2l', title: 'Triturador Elétrico ChefPro 2L Bivolt + Tábua de Madeira Grátis', unitPrice: 49.9 },
   'motor-scent': { id: 'motor-scent', title: 'Motor Scent — Umidificador Automotivo', unitPrice: 139.9 }
 };
 

@@ -1,6 +1,6 @@
 (() => {
   const CART_KEY = 'chefpro_cart_v1';
-  const product = { id: 'chefpro-2l', title: 'Triturador Elétrico ChefPro 2L Bivolt + Tábua de Madeira Grátis', price: 89.90, image: 'https://lojamaxlarapp.com/cdn/shop/files/6_700x_e3bfb5c3-31ad-4db8-8622-d66c1ed366f3.webp?v=1789224097' };
+  const product = { id: 'chefpro-2l', title: 'Triturador Elétrico ChefPro 2L Bivolt + Tábua de Madeira Grátis', price: 49.90, image: 'https://lojamaxlarapp.com/cdn/shop/files/6_700x_e3bfb5c3-31ad-4db8-8622-d66c1ed366f3.webp?v=1789224097' };
   const pixPrice = 80.91;
   const loadPixel = callback => {
     if (window.MetaPixel) return callback();
@@ -15,7 +15,7 @@
   const updateLandingDetails = () => {
     const root = document.querySelector('product-price[data-product-id="8695262085295"]') || document.querySelector('#MainContent product-price');
     if (root) {
-      root.querySelectorAll('.price').forEach(price => { price.textContent = 'R$ 89,90'; price.dataset.price = '8990'; });
+      root.querySelectorAll('.price').forEach(price => { price.textContent = 'R$ 49,90'; price.dataset.price = '4990'; });
       root.querySelectorAll('.discount__percentage').forEach(discount => { discount.lastChild.nodeValue = '64%'; });
       const installmentCopy = root.querySelector('.parcelamento');
       // O Brick é a fonte de verdade para o valor exato de cada parcela.

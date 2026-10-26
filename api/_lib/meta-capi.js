@@ -17,8 +17,8 @@ export async function sendMetaPurchase(payment) {
       currency: String(payment.currency_id || 'BRL'),
       value,
       content_type: 'product',
-      content_ids: ['chefpro-2l'],
-      contents: [{ id: 'chefpro-2l', quantity, item_price: Number((value / quantity).toFixed(2)) }]
+      content_ids: [String(payment.metadata?.product_id || 'chefpro-2l')],
+      contents: [{ id: String(payment.metadata?.product_id || 'chefpro-2l'), quantity, item_price: Number((value / quantity).toFixed(2)) }]
     }
   };
   try {

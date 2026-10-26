@@ -1,7 +1,7 @@
 const product = {
   id: 'chefpro-2l',
   title: 'Triturador Elétrico ChefPro 2L Bivolt + Tábua de Madeira Grátis',
-  unitPrice: 89.9,
+  unitPrice: 49.9,
   currency: 'BRL'
 };
 

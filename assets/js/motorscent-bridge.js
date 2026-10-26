@@ -1,6 +1,13 @@
 (() => {
   const priceFor = quantity => quantity === 1 ? 139.90 : quantity === 2 ? 129.90 : 99.90;
   const brl = value => Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const analyticsProduct = { id: 'motor-scent', title: 'Motor Scent — Umidificador Automotivo', price: 139.90 };
+  const withPixel = callback => {
+    if (window.MetaPixel) { callback(); return; }
+    if (!document.querySelector('script[src="assets/js/meta-pixel.js"]')) { const script = document.createElement('script'); script.src = 'assets/js/meta-pixel.js'; document.head.append(script); }
+    window.addEventListener('meta-pixel-ready', callback, { once: true });
+  };
+  const trackMotor = (event, extra = {}) => withPixel(() => window.MetaPixel?.track(event, { ...window.MetaPixel.content(analyticsProduct), ...extra }));
   const translations = new Map([
     ['Your car. Your scent. Your space.', 'Seu carro. Seu aroma. Seu espaço.'],
     ['Motor Scent is a desk humidifier shaped like your dream ride.', 'Motor Scent é um umidificador de mesa no formato do carro dos seus sonhos.'],
@@ -114,6 +121,7 @@
     const unit = priceFor(quantity);
     const lavenderOil = document.querySelector('[data-handle="lavender-oil"]')?.dataset.selected === 'true';
     localStorage.setItem('chefpro_cart_v1', JSON.stringify({ id: 'motor-scent', title: `Motor Scent — ${selectedVariant()}`, image: selectedImage(), quantity, price: unit, extras: { lavenderOil } }));
+    trackMotor('AddToCart', { value: Number((unit * quantity + (lavenderOil ? 20 : 0)).toFixed(2)), contents: [{ id: 'motor-scent', quantity }] });
     location.assign('/carrinho');
   };
   const optimizeImages = () => {
@@ -209,7 +217,7 @@
     };
     try { const saved = JSON.parse(localStorage.getItem('motorscent_shipping_v1') || 'null'); if (saved?.zip) { input.value = saved.zip.replace(/(\d{5})(\d)/, '$1-$2'); calculate(); } else detectLocation(); } catch { detectLocation(); }
   };
-  document.addEventListener('DOMContentLoaded', () => { document.documentElement.lang = 'pt-BR'; translate(document.body); optimizeImages(); syncSelectedModel(); configureLavenderUpsell(); addPaymentNote(); addShippingEstimator(); updateOffer(); document.querySelectorAll('[name="quantity"]').forEach(input => input.addEventListener('change', updateOffer)); document.querySelectorAll('input[name="Model"]').forEach(input => input.addEventListener('change', syncSelectedModel)); }, { once: true });
+  document.addEventListener('DOMContentLoaded', () => { document.documentElement.lang = 'pt-BR'; translate(document.body); optimizeImages(); trackMotor('ViewContent'); syncSelectedModel(); configureLavenderUpsell(); addPaymentNote(); addShippingEstimator(); updateOffer(); document.querySelectorAll('[name="quantity"]').forEach(input => input.addEventListener('change', updateOffer)); document.querySelectorAll('input[name="Model"]').forEach(input => input.addEventListener('change', syncSelectedModel)); }, { once: true });
   document.addEventListener('submit', goToCheckout, true);
-  document.addEventListener('click', event => { const link = event.target instanceof Element && event.target.closest('a[href*="/cart"], a[href*="/checkout"]'); if (!link) return; event.preventDefault(); const form = document.querySelector('form[action*="cart/add"], form.shopify-product-form'); if (form) goToCheckout({ target: form, preventDefault() {}, stopImmediatePropagation() {} }); }, true);
+  document.addEventListener('click', event => { const anchor = event.target instanceof Element && event.target.closest('a[href]'); if (anchor?.href) withPixel(() => window.MetaPixel?.trackCustom('LinkClick', { link_url: anchor.href, link_text: anchor.textContent.trim().slice(0, 120) })); const link = anchor?.matches('a[href*="/cart"], a[href*="/checkout"]') && anchor; if (!link) return; event.preventDefault(); const form = document.querySelector('form[action*="cart/add"], form.shopify-product-form'); if (form) goToCheckout({ target: form, preventDefault() {}, stopImmediatePropagation() {} }); }, true);
 })();
