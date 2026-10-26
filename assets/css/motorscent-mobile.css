@@ -37,6 +37,17 @@ main > section:not(:first-child),
 .motorscent-delivery-icon { flex: 0 0 49px; width: 49px; height: 49px; display: grid; place-items: center; border-radius: 50%; background: #0cbbe7; color: #fff; font-size: 25px; line-height: 1; }
 .motorscent-delivery-icon--return { background: #16c789; font-size: 27px; }
 
+/* Fluid controls and cards across compact phones, tablets, and large displays. */
+.product-info-upsells-container { max-width: 100%; }
+.upsell__container { min-width: 0; }
+.upsell__content, .upsell__title { min-width: 0; }
+.upsell__title h3, .upsell__desc { overflow-wrap: anywhere; }
+@media screen and (min-width: 750px) and (max-width: 1100px) {
+  .page-width, .page-width-desktop { padding-left: 24px !important; padding-right: 24px !important; }
+  .product--large, .product--medium { gap: 28px !important; }
+  .product__title h1 { font-size: clamp(29px, 3vw, 40px) !important; }
+}
+
 @media screen and (max-width: 749px) {
   .page-width,
   .page-width-desktop { padding-left: 16px !important; padding-right: 16px !important; }
@@ -64,6 +75,11 @@ main > section:not(:first-child),
   .quantity-breaks-container,
   .quantity-breaks { display: grid !important; grid-template-columns: 1fr !important; gap: 10px !important; }
   .quantity-break { min-height: 0 !important; padding: 13px !important; }
+  .upsell__container { align-items: flex-start !important; }
+  .upsell__image { flex: 0 0 52px !important; }
+  .upsell__image img { width: 52px !important; height: 52px !important; object-fit: cover; }
+  .upsell__title h3 { font-size: 14px !important; line-height: 1.25 !important; }
+  .upsell__desc { font-size: 12px !important; line-height: 1.35 !important; }
   .motorscent-shipping-form { flex-direction: column; }
   .motorscent-shipping-form button { width: 100%; }
   .motorscent-shipping-results { overflow-x: auto; }

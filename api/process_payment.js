@@ -18,7 +18,7 @@ export default async function handler(request, response) {
   if (!quota.allowed) return response.status(429).json({ error: 'Muitas tentativas. Aguarde um minuto antes de tentar novamente.' });
   if (!process.env.MP_ACCESS_TOKEN || !process.env.MP_PUBLIC_KEY) return response.status(503).json({ error: 'Pagamento ainda não configurado.' });
 
-  const { formData = {}, quantity: requestedQuantity, customer = {}, productId } = request.body || {};
+  const { formData = {}, quantity: requestedQuantity, customer = {}, productId, extras = {} } = request.body || {};
   const quantity = quantityFrom(requestedQuantity);
   const product = products[String(productId || 'chefpro-2l')] || products['chefpro-2l'];
   const email = String(formData.payer?.email || '').trim();
@@ -28,17 +28,19 @@ export default async function handler(request, response) {
     return response.status(422).json({ error: 'Este meio de pagamento não está disponível para esta compra.' });
   }
 
+  const lavenderOil = product.id === 'motor-scent' && extras?.lavenderOil === true;
+  const extrasAmount = lavenderOil ? 20 : 0;
   const orderId = `CP-${Date.now()}-${randomUUID().slice(0, 8)}`;
   const payload = {
-    transaction_amount: Number((priceFor(product, quantity) * quantity).toFixed(2)),
+    transaction_amount: Number((priceFor(product, quantity) * quantity + extrasAmount).toFixed(2)),
     token: formData.token,
-    description: `${product.title} × ${quantity}`,
+    description: `${product.title} × ${quantity}${lavenderOil ? ' + óleo de lavanda' : ''}`,
     installments: Number(formData.installments) || 1,
     payment_method_id: formData.payment_method_id,
     issuer_id: formData.issuer_id,
     payer: { ...formData.payer, email },
     external_reference: orderId,
-    metadata: { product_id: product.id, quantity, customer_name: String(customer.name || '').slice(0, 120) }
+    metadata: { product_id: product.id, quantity, lavender_oil: lavenderOil, customer_name: String(customer.name || '').slice(0, 120) }
   };
   // Cartão gera token; alguns meios (como Pix) não o utilizam.
   Object.keys(payload).forEach(key => payload[key] === undefined && delete payload[key]);

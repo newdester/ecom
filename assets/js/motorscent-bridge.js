@@ -112,7 +112,8 @@
     event.preventDefault(); event.stopImmediatePropagation();
     const quantity = Math.min(10, Math.max(1, Number(form.querySelector('[name="quantity"]')?.value || 1)));
     const unit = priceFor(quantity);
-    localStorage.setItem('chefpro_cart_v1', JSON.stringify({ id: 'motor-scent', title: `Motor Scent — ${selectedVariant()}`, image: selectedImage(), quantity, price: unit }));
+    const lavenderOil = document.querySelector('[data-handle="lavender-oil"]')?.dataset.selected === 'true';
+    localStorage.setItem('chefpro_cart_v1', JSON.stringify({ id: 'motor-scent', title: `Motor Scent — ${selectedVariant()}`, image: selectedImage(), quantity, price: unit, extras: { lavenderOil } }));
     location.assign('/carrinho');
   };
   const optimizeImages = () => {
@@ -132,6 +133,31 @@
     note.id = 'motorscent-payment-note';
     note.textContent = 'Pagamento seguro via Mercado Pago: Pix, cartão e saldo da carteira. As opções de parcelamento e eventuais juros aparecem antes da confirmação.';
     form.append(note);
+  };
+  const configureLavenderUpsell = () => {
+    const lavender = document.querySelector('[data-handle="lavender-oil"]');
+    if (!lavender) return;
+    const price = lavender.querySelector('.regular-price');
+    const compare = lavender.querySelector('.compare-price');
+    const title = lavender.querySelector('.upsell__title h3');
+    const description = lavender.querySelector('.upsell__desc');
+    const toggle = lavender.querySelector('.upsell-toggle-btn, .upsell__toggle-switch');
+    if (title) title.textContent = 'Óleo de lavanda para Motor Scent';
+    if (description) description.textContent = 'Adicione algumas gotas ao reservatório para perfumar a névoa.';
+    if (price) price.textContent = 'R$ 20,00';
+    if (compare) compare.style.display = 'none';
+    lavender.dataset.selected = 'false';
+    toggle?.setAttribute('aria-pressed', 'false');
+    document.addEventListener('click', event => {
+      const button = event.target instanceof Element && event.target.closest('[data-handle="lavender-oil"] .upsell-toggle-btn, [data-handle="lavender-oil"] .upsell__toggle-switch');
+      if (!button) return;
+      event.preventDefault(); event.stopImmediatePropagation();
+      const selected = lavender.dataset.selected !== 'true';
+      lavender.dataset.selected = String(selected);
+      lavender.classList.toggle('is-selected', selected);
+      button.setAttribute('aria-pressed', String(selected));
+    }, true);
+    document.querySelector('[data-handle="shipping-protection"]')?.remove();
   };
   const addShippingEstimator = () => {
     if (document.querySelector('#motorscent-shipping-estimator')) return;
@@ -183,7 +209,7 @@
     };
     try { const saved = JSON.parse(localStorage.getItem('motorscent_shipping_v1') || 'null'); if (saved?.zip) { input.value = saved.zip.replace(/(\d{5})(\d)/, '$1-$2'); calculate(); } else detectLocation(); } catch { detectLocation(); }
   };
-  document.addEventListener('DOMContentLoaded', () => { document.documentElement.lang = 'pt-BR'; translate(document.body); optimizeImages(); syncSelectedModel(); addPaymentNote(); addShippingEstimator(); updateOffer(); document.querySelectorAll('[name="quantity"]').forEach(input => input.addEventListener('change', updateOffer)); document.querySelectorAll('input[name="Model"]').forEach(input => input.addEventListener('change', syncSelectedModel)); }, { once: true });
+  document.addEventListener('DOMContentLoaded', () => { document.documentElement.lang = 'pt-BR'; translate(document.body); optimizeImages(); syncSelectedModel(); configureLavenderUpsell(); addPaymentNote(); addShippingEstimator(); updateOffer(); document.querySelectorAll('[name="quantity"]').forEach(input => input.addEventListener('change', updateOffer)); document.querySelectorAll('input[name="Model"]').forEach(input => input.addEventListener('change', syncSelectedModel)); }, { once: true });
   document.addEventListener('submit', goToCheckout, true);
   document.addEventListener('click', event => { const link = event.target instanceof Element && event.target.closest('a[href*="/cart"], a[href*="/checkout"]'); if (!link) return; event.preventDefault(); const form = document.querySelector('form[action*="cart/add"], form.shopify-product-form'); if (form) goToCheckout({ target: form, preventDefault() {}, stopImmediatePropagation() {} }); }, true);
 })();

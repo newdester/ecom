@@ -48,17 +48,19 @@ async function processPayment(req, res) {
     const form = body.formData || {};
     const email = String(form.payer?.email || '').trim();
     if (!form.payment_method_id || !/^\S+@\S+\.\S+$/.test(email)) return reply(res, 422, { error: 'Dados de pagamento incompletos.' });
+    const lavenderOil = product.id === 'motor-scent' && body.extras?.lavenderOil === true;
+    const extrasAmount = lavenderOil ? 20 : 0;
     const orderId = `CP-${Date.now()}-${randomUUID().slice(0, 8)}`;
     const payload = {
-      transaction_amount: Number((priceFor(product, quantity) * quantity).toFixed(2)),
+      transaction_amount: Number((priceFor(product, quantity) * quantity + extrasAmount).toFixed(2)),
       token: form.token,
-      description: `${product.title} × ${quantity}`,
+      description: `${product.title} × ${quantity}${lavenderOil ? ' + óleo de lavanda' : ''}`,
       installments: Number(form.installments) || 1,
       payment_method_id: form.payment_method_id,
       issuer_id: form.issuer_id,
       payer: { ...form.payer, email },
       external_reference: orderId,
-      metadata: { product_id: product.id, quantity, customer_name: String(body.customer?.name || '').slice(0, 120) }
+      metadata: { product_id: product.id, quantity, lavender_oil: lavenderOil, customer_name: String(body.customer?.name || '').slice(0, 120) }
     };
     Object.keys(payload).forEach(key => payload[key] === undefined && delete payload[key]);
     if (config.publicBaseUrl) payload.notification_url = `${config.publicBaseUrl}/api/mercadopago/webhook`;

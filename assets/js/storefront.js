@@ -12,7 +12,8 @@ const Storefront = (() => {
     if (productId === 'motor-scent') return units === 1 ? 139.90 : units === 2 ? 129.90 : 99.90;
     return 89.90;
   };
-  const totalFor = cart => Number((unitPrice(cart.id, cart.quantity) * cart.quantity).toFixed(2));
+  const extrasFor = cart => cart?.id === 'motor-scent' && cart?.extras?.lavenderOil ? 20 : 0;
+  const totalFor = cart => Number((unitPrice(cart.id, cart.quantity) * cart.quantity + extrasFor(cart)).toFixed(2));
   const getCart = () => { try { return JSON.parse(localStorage.getItem(CART)); } catch { return null; } };
   const putCart = cart => localStorage.setItem(CART, JSON.stringify(cart));
   const applyBrand = cart => {
@@ -26,7 +27,7 @@ const Storefront = (() => {
     const cart = getCart(), root = document.querySelector('#cartItem'); applyBrand(cart);
     if (!cart || !root) { document.querySelector('#empty')?.classList.remove('hidden'); document.querySelector('#checkoutLink')?.classList.add('hidden'); document.querySelector('#cartCount')?.replaceChildren('0'); return; }
     document.querySelector('#cartCount')?.replaceChildren(String(cart.quantity));
-    const draw = () => { const price = unitPrice(cart.id, cart.quantity), total = totalFor(cart); const tier = cart.id === 'motor-scent' ? (cart.quantity === 1 ? 'Oferta para 1 unidade' : cart.quantity === 2 ? 'Oferta para 2 unidades' : 'Oferta para 3 ou mais unidades') : ''; root.innerHTML = `<div class="cart-line"><img src="${cart.image}" alt="${cart.title}"><div><p class="cart-name">${cart.title}</p><span class="cart-meta">${brl(price)} por unidade${tier ? ` · ${tier}` : ''}</span><div class="quantity"><button data-change="-1" aria-label="Diminuir">−</button><strong>${cart.quantity}</strong><button data-change="1" aria-label="Aumentar">+</button><button class="remove" data-remove>Remover</button></div></div><b class="cart-price">${brl(total)}</b></div>`; document.querySelector('#subtotal').textContent = brl(total); document.querySelector('#total').textContent = brl(total); document.querySelector('#deliveryWindow')?.replaceChildren('Entrega estimada: 5 a 7 dias corridos'); };
+    const draw = () => { const price = unitPrice(cart.id, cart.quantity), extra = extrasFor(cart), total = totalFor(cart); const tier = cart.id === 'motor-scent' ? (cart.quantity === 1 ? 'Oferta para 1 unidade' : cart.quantity === 2 ? 'Oferta para 2 unidades' : 'Oferta para 3 ou mais unidades') : ''; root.innerHTML = `<div class="cart-line"><img src="${cart.image}" alt="${cart.title}"><div><p class="cart-name">${cart.title}</p><span class="cart-meta">${brl(price)} por unidade${tier ? ` · ${tier}` : ''}</span>${extra ? `<p class="cart-meta">Óleo de lavanda para Motor Scent · ${brl(extra)}</p>` : ''}<div class="quantity"><button data-change="-1" aria-label="Diminuir">−</button><strong>${cart.quantity}</strong><button data-change="1" aria-label="Aumentar">+</button><button class="remove" data-remove>Remover</button></div></div><b class="cart-price">${brl(total)}</b></div>`; document.querySelector('#subtotal').textContent = brl(total); document.querySelector('#total').textContent = brl(total); document.querySelector('#deliveryWindow')?.replaceChildren('Entrega estimada: 5 a 7 dias úteis'); };
     root.addEventListener('click', event => { if (event.target.matches('[data-remove]')) { localStorage.removeItem(CART); location.reload(); } const change = Number(event.target.dataset.change); if (change) { cart.quantity = Math.max(1, Math.min(10, cart.quantity + change)); cart.price = unitPrice(cart.id, cart.quantity); putCart(cart); draw(); } }); draw();
     const deliveryWindow = document.createElement('p');
     deliveryWindow.id = 'deliveryWindow';
@@ -39,5 +40,5 @@ const Storefront = (() => {
     const send = () => window.MetaPixel?.track(event, { ...window.MetaPixel.content(product), ...extra });
     if (window.MetaPixel) send(); else window.addEventListener('meta-pixel-ready', send, { once: true });
   };
-  return { CART, CUSTOMER, PAYMENT, brl, unitPrice, totalFor, getCart, putCart, applyBrand, renderCart, renderThankYou, track };
+  return { CART, CUSTOMER, PAYMENT, brl, unitPrice, extrasFor, totalFor, getCart, putCart, applyBrand, renderCart, renderThankYou, track };
 })();
