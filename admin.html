@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <title>Painel de operações — MaxLar</title>
+  <link rel="icon" href="https://lojamaxlarapp.com/cdn/shop/files/WhatsApp_Image_2026-05-28_at_13.36.49_1.jpg?v=1779986642">
+  <link rel="stylesheet" href="assets/css/admin.css">
+  <link rel="stylesheet" href="assets/css/admin-overrides.css">
+</head>
+<body>
+  <header class="admin-header">
+    <a class="brand" href="index.html" aria-label="Voltar para a loja"><img src="https://lojamaxlarapp.com/cdn/shop/files/WhatsApp_Image_2026-05-28_at_13.36.49_1.jpg?v=1779986642" alt="MaxLar"></a>
+    <div><p class="eyebrow">Área interna</p><h1>Painel de operações</h1></div>
+    <button class="refresh" id="refresh" type="button">Atualizar dados</button>
+  </header>
+
+  <main class="shell">
+    <section class="access-card" id="accessCard">
+      <p class="eyebrow">Link privado</p>
+      <h2>Abra o painel com a chave de acesso</h2>
+      <p>Para não expor faturamento e status de pagamentos publicamente, use o endereço <code>/admin#token=SUA_CHAVE</code>. Não há contas ou tela de login.</p>
+      <label for="tokenInput">Chave do painel</label>
+      <div class="token-row"><input id="tokenInput" type="password" autocomplete="off" placeholder="Cole a chave configurada na Vercel"><button id="openDashboard" type="button">Abrir</button></div>
+      <p class="access-error" id="accessError" aria-live="polite"></p>
+    </section>
+
+    <section class="dashboard hidden" id="dashboard">
+      <section class="toolbar" aria-label="Período de análise">
+        <div><p class="eyebrow">Comparativo</p><h2>Campanha atual × período anterior</h2></div>
+        <form id="periodForm" class="period-form">
+          <label>Início atual<input id="currentStart" type="date" required></label>
+          <label>Fim atual<input id="currentEnd" type="date" required></label>
+          <label>Início anterior<input id="previousStart" type="date"></label>
+          <label>Fim anterior<input id="previousEnd" type="date"></label>
+          <button type="submit">Aplicar</button>
+        </form>
+      </section>
+
+      <p class="updated" id="updated" aria-live="polite"></p>
+      <section class="metrics" id="metrics"></section>
+
+      <section class="grid grid-two">
+        <article class="card"><div class="card-title"><div><p class="eyebrow">Vendas</p><h2>Faturamento diário</h2></div><span class="status-dot" id="paymentStatus">—</span></div><div class="chart" id="chart" aria-label="Gráfico de faturamento por dia"></div><p class="muted">Valores aprovados, já descontados os reembolsos reportados pelo Mercado Pago.</p></article>
+        <article class="card"><p class="eyebrow">Canais de pagamento</p><h2>Receita aprovada</h2><div class="methods" id="methods"></div><div class="installments" id="installments"></div></article>
+      </section>
+
+      <section class="grid grid-two">
+        <article class="card"><p class="eyebrow">Campanhas Meta</p><h2>Investimento e resultado</h2><div id="campaigns"></div></article>
+        <article class="card"><p class="eyebrow">Funil do site</p><h2>O que está sendo medido</h2><div id="funnel"></div></article>
+      </section>
+
+      <section class="grid grid-wide">
+        <article class="card"><p class="eyebrow">Otimizações prioritárias</p><h2>Próximas ações</h2><ol class="recommendations" id="recommendations"></ol></article>
+        <article class="card"><p class="eyebrow">Integrações</p><h2>Saúde operacional</h2><div class="integration-list" id="integrations"></div></article>
+      </section>
+
+      <section class="card orders"><p class="eyebrow">Últimas tentativas</p><h2>Atividade de pagamentos</h2><div class="table-wrap"><table><thead><tr><th>Horário</th><th>Referência</th><th>Meio</th><th>Parcelas</th><th>Status</th><th>Valor</th></tr></thead><tbody id="orders"></tbody></table></div><p class="muted">A lista é propositalmente anonimizada: nenhum dado pessoal do comprador aparece no painel.</p></section>
+      <p class="footnote" id="limitations"></p>
+    </section>
+  </main>
+  <script src="assets/js/admin.js?v=20261026-1"></script>
+</body>
+</html>

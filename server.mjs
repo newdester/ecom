@@ -3,9 +3,11 @@ import { readFile, stat } from 'node:fs/promises';
 import { createHash, createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import adminOverview from './api/admin/overview.js';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const env = Object.fromEntries((await readFile(path.join(root, '.env'), 'utf8').catch(() => '')).split(/\r?\n/).map(line => line.trim()).filter(line => line && !line.startsWith('#')).map(line => { const i = line.indexOf('='); return [line.slice(0, i), line.slice(i + 1)]; }));
+Object.entries(env).forEach(([key, value]) => { if (!process.env[key]) process.env[key] = value; });
 const config = { publicKey: env.MP_PUBLIC_KEY || '', accessToken: env.MP_ACCESS_TOKEN || '', webhookSecret: env.MP_WEBHOOK_SECRET || '', publicBaseUrl: String(env.PUBLIC_BASE_URL || '').replace(/\/$/, '') };
 const rateBuckets = new Map();
 const allowRequest = (req, scope, limit, windowMs) => {
@@ -65,6 +67,11 @@ async function processPayment(req, res) {
 http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
   if (req.method === 'GET' && url.pathname === '/api/config') return reply(res, 200, { publicKey: config.publicKey, paymentEnabled: Boolean(config.accessToken && config.publicKey), metaCapiEnabled: Boolean(env.META_PIXEL_ID && env.META_ACCESS_TOKEN), product });
+  if (req.method === 'GET' && url.pathname === '/api/admin/overview') {
+    const request = { method: req.method, headers: req.headers, socket: req.socket, query: Object.fromEntries(url.searchParams.entries()) };
+    const response = { setHeader: (name, value) => res.setHeader(name, value), status(code) { this.code = code; return this; }, json(body) { return reply(res, this.code || 200, body); } };
+    return adminOverview(request, response);
+  }
   if (req.method === 'POST' && url.pathname === '/api/process_payment') return processPayment(req, res);
   if (req.method === 'POST' && url.pathname === '/api/mercadopago/webhook') {
     const quota = allowRequest(req, 'webhook', 120, 60_000); applyRate(res, quota);
@@ -72,7 +79,8 @@ http.createServer(async (req, res) => {
     try { const body = await readBody(req); if (!validWebhook(req, url, body)) return reply(res, 401, { error: 'Assinatura de webhook inválida.' }); return reply(res, 200, { received: true }); } catch { return reply(res, 400, { error: 'Corpo inválido.' }); }
   }
   if (req.method !== 'GET' && req.method !== 'HEAD') return reply(res, 405, { error: 'Método não permitido.' });
-  const pathname = decodeURIComponent(url.pathname === '/' ? '/index.html' : url.pathname);
+  const requestedPath = url.pathname === '/' ? '/index.html' : url.pathname === '/admin' ? '/admin.html' : url.pathname;
+  const pathname = decodeURIComponent(requestedPath);
   const file = path.resolve(root, `.${pathname}`);
   if (!file.startsWith(root)) return reply(res, 403, { error: 'Acesso negado.' });
   try { const info = await stat(file); if (!info.isFile()) throw new Error('not file'); const data = await readFile(file); res.writeHead(200, { 'Content-Type': types[path.extname(file)] || 'application/octet-stream' }); if (req.method === 'HEAD') res.end(); else res.end(data); } catch { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); res.end('Página não encontrada.'); }
