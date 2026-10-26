@@ -1,4 +1,3 @@
-import { adminDashboardIsConfigured, adminIsAuthorized } from '../_lib/admin-auth.js';
 import { rateLimit, sendRateHeaders } from '../_lib/rate-limit.js';
 
 const PRODUCT_ID = 'chefpro-2l';
@@ -197,8 +196,6 @@ export default async function handler(request, response) {
   const quota = rateLimit(request, 'admin-dashboard', { limit: 20, windowMs: 60_000 });
   sendRateHeaders(response, quota);
   if (!quota.allowed) return response.status(429).json({ error: 'Muitas consultas. Aguarde um minuto.' });
-  if (!adminDashboardIsConfigured()) return response.status(503).json({ error: 'Painel ainda não configurado.' });
-  if (!adminIsAuthorized(request)) return response.status(401).json({ error: 'Acesso não autorizado.' });
   const periods = periodFrom(request.query || {});
   if (!periods) return response.status(422).json({ error: 'Use períodos entre 1 e 365 dias.' });
 

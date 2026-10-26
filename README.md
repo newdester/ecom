@@ -26,13 +26,7 @@ O checkout usa o **Payment Brick** do Mercado Pago para cartão e Pix. Os campos
 
 ## Painel de operações
 
-O painel fica em `/admin` e não mostra dados pessoais, cartões ou segredos. Ele consulta o Mercado Pago no servidor, resume vendas do ChefPro, pagamentos pendentes, meios de pagamento, parcelas, comparativo entre dois períodos e recomendações operacionais.
-
-Para evitar expor faturamento em uma URL pública, configure na Vercel uma variável `ADMIN_DASHBOARD_TOKEN` com uma chave aleatória longa. Não há conta de usuário, login ou banco de senhas: abra o painel por um link privado neste formato:
-
-`https://sua-loja.com.br/admin#token=SUA_CHAVE`
-
-O fragmento após `#` não é enviado nas requisições HTTP. A página o transforma em um cabeçalho de autorização para consultar apenas os agregados do painel.
+O painel fica em `/admin`, sem login ou chave de acesso. Ele consulta o Mercado Pago no servidor, resume vendas do ChefPro, pagamentos pendentes, meios de pagamento, parcelas, comparativo entre dois períodos e recomendações operacionais. Ele não mostra dados pessoais, cartões ou segredos.
 
 Para incorporar desempenho de anúncios por campanha, configure também `META_AD_ACCOUNT_ID`, `META_ADS_ACCESS_TOKEN` (com permissões `ads_read` e `read_insights`) e `META_GRAPH_API_VERSION`. O token da Conversions API não deve ser reutilizado para esse fim.
 

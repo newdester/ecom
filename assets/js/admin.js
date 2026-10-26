@@ -1,6 +1,5 @@
 (() => {
   const $ = selector => document.querySelector(selector);
-  const tokenKey = 'maxlar_admin_dashboard_token';
   const date = value => new Date(value).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
   const time = value => new Date(value).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
   const money = value => Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -8,14 +7,7 @@
   const escape = value => String(value ?? '').replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[char]);
   const iso = value => value.toISOString().slice(0, 10);
   const defaultPeriods = () => { const end = new Date(); end.setHours(0, 0, 0, 0); const start = new Date(end); start.setDate(start.getDate() - 29); const previousEnd = new Date(start); previousEnd.setDate(previousEnd.getDate() - 1); const previousStart = new Date(previousEnd); previousStart.setDate(previousStart.getDate() - 29); return { currentStart: iso(start), currentEnd: iso(end), previousStart: iso(previousStart), previousEnd: iso(previousEnd) }; };
-  const state = { token: '', data: null };
-
-  function tokenFromLocation() {
-    const hash = new URLSearchParams(location.hash.replace(/^#/, ''));
-    const token = hash.get('token');
-    if (token) { sessionStorage.setItem(tokenKey, token); history.replaceState(null, '', `${location.pathname}${location.search}`); return token; }
-    return sessionStorage.getItem(tokenKey) || '';
-  }
+  const state = { data: null };
 
   function setPeriods(values = defaultPeriods()) { Object.entries(values).forEach(([key, value]) => { $(`#${key}`).value = value; }); }
   function currentPeriods() { return { currentStart: $('#currentStart').value, currentEnd: $('#currentEnd').value, previousStart: $('#previousStart').value, previousEnd: $('#previousEnd').value }; }
@@ -64,32 +56,27 @@
 
   function render(data) {
     state.data = data;
-    $('#accessCard').classList.add('hidden'); $('#dashboard').classList.remove('hidden');
     renderMetrics(data); renderChart(data.current.daily); renderPayments(data); renderCampaigns(data); renderFunnel(data); renderRecommendations(data); renderIntegrations(data); renderOrders(data);
     $('#updated').textContent = `Atualizado em ${time(data.generatedAt)} · Vendas consultadas diretamente no Mercado Pago.`;
     $('#limitations').textContent = data.limitations.join(' ');
   }
 
   async function load() {
-    if (!state.token) return;
     const periods = currentPeriods();
     const params = new URLSearchParams({ current_start: periods.currentStart, current_end: periods.currentEnd, previous_start: periods.previousStart, previous_end: periods.previousEnd });
     $('#refresh').disabled = true; $('#refresh').textContent = 'Atualizando…'; $('#updated').textContent = 'Consultando dados de vendas…';
     try {
-      const response = await fetch(`/api/admin/overview?${params}`, { headers: { Authorization: `Bearer ${state.token}` }, cache: 'no-store' });
+      const response = await fetch(`/api/admin/overview?${params}`, { cache: 'no-store' });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Não foi possível carregar o painel.');
       render(data);
     } catch (error) {
-      $('#accessCard').classList.remove('hidden'); $('#dashboard').classList.add('hidden'); $('#accessError').textContent = error.message === 'Acesso não autorizado.' ? 'Chave inválida ou expirada.' : error.message;
+      $('#updated').textContent = error.message;
     } finally { $('#refresh').disabled = false; $('#refresh').textContent = 'Atualizar dados'; }
   }
 
   setPeriods();
-  state.token = tokenFromLocation();
-  $('#tokenInput').value = state.token;
-  $('#openDashboard').addEventListener('click', () => { state.token = $('#tokenInput').value.trim(); if (!state.token) { $('#accessError').textContent = 'Informe a chave privada do painel.'; return; } sessionStorage.setItem(tokenKey, state.token); load(); });
   $('#periodForm').addEventListener('submit', event => { event.preventDefault(); load(); });
   $('#refresh').addEventListener('click', load);
-  if (state.token) load();
+  load();
 })();

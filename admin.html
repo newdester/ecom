@@ -18,16 +18,7 @@
   </header>
 
   <main class="shell">
-    <section class="access-card" id="accessCard">
-      <p class="eyebrow">Link privado</p>
-      <h2>Abra o painel com a chave de acesso</h2>
-      <p>Para não expor faturamento e status de pagamentos publicamente, use o endereço <code>/admin#token=SUA_CHAVE</code>. Não há contas ou tela de login.</p>
-      <label for="tokenInput">Chave do painel</label>
-      <div class="token-row"><input id="tokenInput" type="password" autocomplete="off" placeholder="Cole a chave configurada na Vercel"><button id="openDashboard" type="button">Abrir</button></div>
-      <p class="access-error" id="accessError" aria-live="polite"></p>
-    </section>
-
-    <section class="dashboard hidden" id="dashboard">
+    <section class="dashboard" id="dashboard">
       <section class="toolbar" aria-label="Período de análise">
         <div><p class="eyebrow">Comparativo</p><h2>Campanha atual × período anterior</h2></div>
         <form id="periodForm" class="period-form">
