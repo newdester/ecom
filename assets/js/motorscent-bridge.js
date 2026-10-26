@@ -83,8 +83,11 @@
     for (let node; node = walker.nextNode();) node.nodeValue = localize(node.nodeValue);
     root.querySelectorAll('[aria-label],[title],[alt],[placeholder]').forEach(element => ['aria-label','title','alt','placeholder'].forEach(attribute => { if (element.hasAttribute(attribute)) element.setAttribute(attribute, localize(element.getAttribute(attribute))); }));
   };
-  const selectedVariant = () => document.querySelector('input[name="id"]:checked, select[name="id"] option:checked')?.textContent?.trim() || document.querySelector('[name="id"]')?.value || 'Motor Scent';
-  const selectedImage = () => document.querySelector('[data-media-id] img, .product__media img, .product-media img')?.getAttribute('src') || 'motorscent-assets/images/motor-scent-gt3.png';
+  const modelNames = new Map([['Black 911 GT3 RS', '911 GT3 RS preto'], ['Red Bull F1', 'Fórmula 1 Red Bull'], ['Green M4', 'M4 verde'], ['Orange Raptor', 'Raptor laranja'], ['Blue Raptor', 'Raptor azul'], ['Red Raptor', 'Raptor vermelho'], ['Green Aventador SVJ', 'Aventador SVJ verde'], ['Orange Aventador SVJ', 'Aventador SVJ laranja'], ['Green McLaren Senna', 'McLaren Senna verde'], ['Black C63 AMG', 'C63 AMG preto'], ['Black G-Wagon', 'G-Wagon preto'], ['Black Corvette Z06', 'Corvette Z06 preto'], ['Purple Hellcat', 'Hellcat roxo'], ['Black RS6 Avant', 'RS6 Avant preto'], ['Black Ram TRX', 'Ram TRX preta'], ['Grey Shelby GT500', 'Shelby GT500 cinza'], ['Grey Audi R8', 'Audi R8 cinza']]);
+  const selectedModelInput = () => document.querySelector('input[name="Model"]:checked');
+  const selectedVariant = () => { const value = selectedModelInput()?.value; return modelNames.get(value) || value || 'Motor Scent'; };
+  const selectedImage = () => { const input = selectedModelInput(); const image = input && document.querySelector(`label[for="${input.id}"]`)?.closest('.color-swatch')?.querySelector('img'); return image?.getAttribute('src') || document.querySelector('[data-media-id] img, .product__media img, .product-media img')?.getAttribute('src') || 'motorscent-assets/images/motor-scent-gt3.png'; };
+  const syncSelectedModel = () => { const model = selectedVariant(); document.querySelectorAll('[id^="custom-label-"]').forEach(label => { label.textContent = `Modelo: ${model}`; }); };
   const updateOffer = () => {
     const quantity = Math.max(1, Number(document.querySelector('[name="quantity"]')?.value || 1));
     const unit = priceFor(quantity), total = unit * quantity;
@@ -137,8 +140,10 @@
     const section = document.createElement('section');
     section.id = 'motorscent-shipping-estimator';
     section.className = 'motorscent-shipping-estimator';
-    section.innerHTML = `<h2>Calcule o envio e o prazo de entrega</h2><div class="motorscent-shipping-form"><label class="visually-hidden" for="motorscent-zip">CEP</label><input id="motorscent-zip" inputmode="numeric" autocomplete="postal-code" maxlength="9" placeholder="Digite seu CEP"><button type="button">Calcular</button></div><p class="motorscent-shipping-message" aria-live="polite"></p><div class="motorscent-shipping-results" hidden><table><thead><tr><th>Entrega</th><th>Prazo</th><th>Preço</th></tr></thead><tbody><tr><td><strong>Padrão</strong></td><td>8 a 11 dias úteis</td><td><strong>Grátis</strong></td></tr><tr><td><strong>Expresso</strong></td><td>5 a 7 dias úteis</td><td><strong>R$ 9,79</strong></td></tr></tbody></table><p>O frete padrão grátis será aplicado no checkout.</p></div><div class="motorscent-delivery-card"><span class="motorscent-delivery-icon" aria-hidden="true">🚚</span><p><strong>Frete grátis</strong> <span data-shipping-location>para sua região</span><br><span>Prazo de envio de 2 a 5 dias úteis</span></p></div><div class="motorscent-delivery-card"><span class="motorscent-delivery-icon motorscent-delivery-icon--return" aria-hidden="true">▣</span><p><strong>Devolução garantida</strong><br><span>Dinheiro de volta em até 7 dias</span></p></div>`;
-    form.after(section);
+    section.innerHTML = `<h2>Calcule o envio e o prazo de entrega</h2><div class="motorscent-shipping-form"><label class="visually-hidden" for="motorscent-zip">CEP</label><input id="motorscent-zip" inputmode="numeric" autocomplete="postal-code" maxlength="9" placeholder="Digite seu CEP"><button type="button">Calcular</button></div><p class="motorscent-shipping-message" aria-live="polite"></p><div class="motorscent-shipping-results" hidden><table><thead><tr><th>Entrega</th><th>Prazo</th><th>Valor</th></tr></thead><tbody><tr><td><strong>Frete padrão</strong></td><td>5 a 7 dias úteis</td><td><strong>R$ 0,00</strong></td></tr></tbody></table><p>Frete grátis aplicado automaticamente no checkout.</p></div><div class="motorscent-delivery-card"><span class="motorscent-delivery-icon" aria-hidden="true">🚚</span><p><strong>Frete grátis</strong> <span data-shipping-location>para sua região</span><br><span>Entrega estimada em 5 a 7 dias úteis</span></p></div><div class="motorscent-delivery-card"><span class="motorscent-delivery-icon motorscent-delivery-icon--return" aria-hidden="true">▣</span><p><strong>Devolução garantida</strong><br><span>Dinheiro de volta em até 7 dias</span></p></div>`;
+    const timeline = document.querySelector('dynamic-dates.shipping-checkpoints');
+    if (timeline) timeline.replaceWith(section); else form.after(section);
+    [...document.querySelectorAll('.product__accordion')].filter(accordion => /shipping|envio/i.test(accordion.textContent)).forEach(accordion => accordion.remove());
     const input = section.querySelector('input');
     const button = section.querySelector('button');
     const message = section.querySelector('.motorscent-shipping-message');
@@ -178,13 +183,7 @@
     };
     try { const saved = JSON.parse(localStorage.getItem('motorscent_shipping_v1') || 'null'); if (saved?.zip) { input.value = saved.zip.replace(/(\d{5})(\d)/, '$1-$2'); calculate(); } else detectLocation(); } catch { detectLocation(); }
   };
-  const localizeDeliveryDates = () => {
-    const format = date => new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', day: '2-digit', month: 'short' }).format(date).replace('.', '');
-    const future = days => { const date = new Date(); date.setDate(date.getDate() + days); return date; };
-    const labels = [format(future(0)), `${format(future(1))} a ${format(future(3))}`, `${format(future(8))} a ${format(future(14))}`];
-    document.querySelectorAll('.shipping-checkpoint__top').forEach((element, index) => { if (labels[index]) element.innerHTML = `<strong>${labels[index]}</strong>`; });
-  };
-  document.addEventListener('DOMContentLoaded', () => { document.documentElement.lang = 'pt-BR'; translate(document.body); optimizeImages(); addPaymentNote(); addShippingEstimator(); localizeDeliveryDates(); setTimeout(localizeDeliveryDates, 700); updateOffer(); document.querySelectorAll('[name="quantity"]').forEach(input => input.addEventListener('change', updateOffer)); }, { once: true });
+  document.addEventListener('DOMContentLoaded', () => { document.documentElement.lang = 'pt-BR'; translate(document.body); optimizeImages(); syncSelectedModel(); addPaymentNote(); addShippingEstimator(); updateOffer(); document.querySelectorAll('[name="quantity"]').forEach(input => input.addEventListener('change', updateOffer)); document.querySelectorAll('input[name="Model"]').forEach(input => input.addEventListener('change', syncSelectedModel)); }, { once: true });
   document.addEventListener('submit', goToCheckout, true);
   document.addEventListener('click', event => { const link = event.target instanceof Element && event.target.closest('a[href*="/cart"], a[href*="/checkout"]'); if (!link) return; event.preventDefault(); const form = document.querySelector('form[action*="cart/add"], form.shopify-product-form'); if (form) goToCheckout({ target: form, preventDefault() {}, stopImmediatePropagation() {} }); }, true);
 })();

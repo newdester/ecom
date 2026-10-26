@@ -8,7 +8,7 @@
   let savedShipping = null;
   try { savedShipping = JSON.parse(localStorage.getItem('motorscent_shipping_v1') || 'null'); } catch {}
   const destination = savedShipping?.city && savedShipping?.state ? ` para ${savedShipping.city} / ${savedShipping.state}` : '';
-  const delivery = `Frete grátis${destination} · entrega estimada de 8 a 11 dias corridos`;
+  const delivery = `Frete grátis${destination} · entrega estimada de 5 a 7 dias úteis`;
   $('#checkoutItem').innerHTML = `<div class="cart-line"><img src="${cart.image}" alt="${cart.title}"><div><p class="cart-name">${cart.title}</p><span class="cart-meta">Quantidade: ${cart.quantity}</span></div><b class="cart-price">${Storefront.brl(total)}</b></div>`;
   $('#checkoutTotal').textContent = Storefront.brl(total);
   document.querySelector('.summary').insertAdjacentHTML('beforeend', `<p class="delivery-promise">${delivery}</p>`);
