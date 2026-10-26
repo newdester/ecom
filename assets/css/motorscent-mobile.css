@@ -1,0 +1,64 @@
+/* Performance and small-screen layer for the imported Motor Scent storefront. */
+html, body { max-width: 100%; overflow-x: hidden; }
+img, video { max-width: 100%; height: auto; }
+
+/* Avoid painting far-below-the-fold product and testimonial sections until needed. */
+main > section:not(:first-child),
+.shopify-section:not(:first-child) {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 720px;
+}
+
+#motorscent-payment-note {
+  margin: 12px 0 0;
+  color: #202020;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+@media screen and (max-width: 749px) {
+  .page-width,
+  .page-width-desktop { padding-left: 16px !important; padding-right: 16px !important; }
+
+  .product--large,
+  .product--medium,
+  .product--small,
+  .product.grid,
+  .image-with-text__grid,
+  .multicolumn-list { grid-template-columns: minmax(0, 1fr) !important; }
+
+  .product__media-wrapper,
+  .product__info-wrapper,
+  .product__media-list,
+  .product__info-container { width: 100% !important; max-width: 100% !important; }
+
+  .product__media img,
+  .product-media-container img,
+  .media img { max-height: min(68vh, 480px); object-fit: contain; }
+
+  .product__title h1,
+  .product__title { font-size: clamp(25px, 7vw, 34px) !important; line-height: 1.14; }
+  .price--large { font-size: 1.85rem !important; }
+
+  .quantity-breaks-container,
+  .quantity-breaks { display: grid !important; grid-template-columns: 1fr !important; gap: 10px !important; }
+  .quantity-break { min-height: 0 !important; padding: 13px !important; }
+
+  .thumbnail-slider,
+  .slider-mobile-gutter .slider { overflow-x: auto; scrollbar-width: thin; scroll-snap-type: x mandatory; }
+  .thumbnail-list__item,
+  .slider__slide { scroll-snap-align: start; }
+
+  .multicolumn-card__info,
+  .image-with-text__content { padding: 20px 0 !important; }
+  .multicolumn-list { row-gap: 20px !important; }
+
+  .sticky-atc { padding: 9px 12px !important; }
+  .sticky-atc__content { gap: 8px !important; }
+  .sticky-atc__title { display: none !important; }
+  .sticky-atc__button { min-height: 45px !important; font-size: 14px !important; }
+
+  .footer__content-top,
+  .footer__content-bottom-wrapper { padding-left: 16px !important; padding-right: 16px !important; }
+}

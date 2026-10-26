@@ -112,7 +112,25 @@
     localStorage.setItem('chefpro_cart_v1', JSON.stringify({ id: 'motor-scent', title: `Motor Scent — ${selectedVariant()}`, image: selectedImage(), quantity, price: unit }));
     location.assign('/carrinho');
   };
-  document.addEventListener('DOMContentLoaded', () => { document.documentElement.lang = 'pt-BR'; translate(document.body); updateOffer(); document.querySelectorAll('[name="quantity"]').forEach(input => input.addEventListener('change', updateOffer)); }, { once: true });
+  const optimizeImages = () => {
+    const images = [...document.images];
+    images.forEach((image, index) => {
+      image.decoding = 'async';
+      if (index > 1) image.loading = 'lazy';
+    });
+    const hero = document.querySelector('[data-media-id] img, .product__media img, .product-media img');
+    if (hero) hero.fetchPriority = 'high';
+  };
+  const addPaymentNote = () => {
+    if (document.querySelector('#motorscent-payment-note')) return;
+    const form = document.querySelector('form[action*="cart/add"], form.shopify-product-form');
+    if (!form) return;
+    const note = document.createElement('p');
+    note.id = 'motorscent-payment-note';
+    note.textContent = 'Pagamento seguro via Mercado Pago: Pix, cartão e saldo da carteira. As opções de parcelamento e eventuais juros aparecem antes da confirmação.';
+    form.append(note);
+  };
+  document.addEventListener('DOMContentLoaded', () => { document.documentElement.lang = 'pt-BR'; translate(document.body); optimizeImages(); addPaymentNote(); updateOffer(); document.querySelectorAll('[name="quantity"]').forEach(input => input.addEventListener('change', updateOffer)); }, { once: true });
   document.addEventListener('submit', goToCheckout, true);
   document.addEventListener('click', event => { const link = event.target instanceof Element && event.target.closest('a[href*="/cart"], a[href*="/checkout"]'); if (!link) return; event.preventDefault(); const form = document.querySelector('form[action*="cart/add"], form.shopify-product-form'); if (form) goToCheckout({ target: form, preventDefault() {}, stopImmediatePropagation() {} }); }, true);
 })();
