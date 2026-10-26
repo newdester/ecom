@@ -15,18 +15,83 @@
     ['Green Aventador SVJ', 'Aventador SVJ verde'], ['Orange Aventador SVJ', 'Aventador SVJ laranja'],
     ['Green McLaren Senna', 'McLaren Senna verde'], ['Black C63 AMG', 'C63 AMG preto'], ['Black G-Wagon', 'G-Wagon preto'],
     ['Black Corvette Z06', 'Corvette Z06 preto'], ['Purple Hellcat', 'Hellcat roxo'], ['Black RS6 Avant', 'RS6 Avant preto'],
-    ['Black Ram TRX', 'Ram TRX preta'], ['Grey Shelby GT500', 'Shelby GT500 cinza'], ['Grey Audi R8', 'Audi R8 cinza']
+    ['Black Ram TRX', 'Ram TRX preta'], ['Grey Shelby GT500', 'Shelby GT500 cinza'], ['Grey Audi R8', 'Audi R8 cinza'],
+    ['18 MODELS · LIGHTS & EXHAUST MIST', '18 MODELOS · LUZES E NÉVOA NO ESCAPAMENTO'], ['18 Models', '18 modelos'],
+    ['17 detailed models to choose from', '17 modelos detalhados para escolher'], ['limited holiday stock', 'estoque limitado'],
+    ['SELLING FAST · LIMITED HOLIDAY STOCK', 'VENDENDO RÁPIDO · ESTOQUE LIMITADO'], ['Selling fast', 'Vendendo rápido'],
+    ['50% OFF LAUNCH SALE', 'OFERTA DE LANÇAMENTO: 50% OFF'], ['SAVE 50%', 'ECONOMIZE 50%'], ['BUNDLE & SAVE', 'COMBO E ECONOMIA'],
+    ['Buy 1', 'Compre 1'], ['Buy 2', 'Compre 2'], ['Buy 3', 'Compre 3'], ['BEST VALUE', 'MELHOR OFERTA'], ['MOST POPULAR', 'MAIS POPULAR'],
+    ['Built For Car Lovers', 'Feito para quem ama carros'], ['Not Just Another Model On A Shelf', 'Não é apenas mais uma miniatura na estante'],
+    ['The perfect gift for any car enthusiast', 'O presente perfeito para qualquer apaixonado por carros'],
+    ['Real Mist, No Heat', 'Névoa de verdade, sem calor'], ['Quiet Enough For The Bedroom', 'Silencioso para o quarto'],
+    ['Realistic headlights & exhaust mist', 'Faróis realistas e névoa pelo escapamento'], ['Night light with attitude', 'Luz noturna cheia de personalidade'],
+    ['Add a scent.', 'Adicione um aroma.'], ['Can I add scent?', 'Posso adicionar aroma?'], ['How does it work?', 'Como funciona?'],
+    ['How big is it?', 'Qual é o tamanho?'], ['Is it real smoke?', 'É fumaça de verdade?'], ['How long does shipping take?', 'Quanto tempo leva a entrega?'],
+    ["What's the return policy?", 'Qual é a política de devolução?'], ['Frequently Asked Questions', 'Perguntas frequentes'],
+    ['A few drops of lavender oil in the tank and the whole room smells like it.', 'Algumas gotas de óleo de lavanda no reservatório perfumam todo o ambiente.'],
+    ['About the size of a 1:24 scale model car, roughly 20 cm long. It fits on a desk, nightstand or shelf.', 'Tem aproximadamente o tamanho de uma miniatura em escala 1:24, com cerca de 20 cm. Cabe na mesa, no criado-mudo ou na estante.'],
+    ['Fill. Tap. Watch it idle.', 'Encha. Toque. Veja funcionar.'], ['Runs for hours.', 'Funciona por horas.'],
+    ['Whisper-quiet ultrasonic mist, USB powered, auto shut-off when the tank is empty.', 'Névoa ultrassônica silenciosa, alimentação USB e desligamento automático quando o reservatório esvazia.'],
+    ['Fill the tank with water, plug in the USB cable and press the button. The ultrasonic plate turns the water into cool mist that comes out of the exhaust while the headlights light up.', 'Encha o reservatório com água, conecte o cabo USB e aperte o botão. A placa ultrassônica transforma a água em névoa fria que sai pelo escapamento enquanto os faróis acendem.'],
+    ['Motor Scent is a working humidifier with the body of a sports car, bike or truck. Fill the tank, tap the button, and the headlights come on while cool mist rolls out of the exhaust.', 'Motor Scent é um umidificador funcional com corpo de carro esportivo, moto ou caminhonete. Encha o reservatório, toque no botão e os faróis acendem enquanto a névoa fria sai pelo escapamento.'],
+    ['No. It is cool water mist, the same as a regular humidifier. No heat, no smell, safe on any desk or shelf.', 'Não. É névoa fria de água, como em um umidificador comum. Sem calor e segura para qualquer mesa ou estante.'],
+    ['Yes. Add a few drops of the Lavender Oil (or any water-soluble essential oil) to the tank and the mist carries the scent.', 'Sim. Adicione algumas gotas do óleo de lavanda (ou qualquer óleo essencial solúvel em água) ao reservatório e a névoa leva o aroma.'],
+    ['One fill lasts an evening, and it shuts off by itself when the tank is empty.', 'Um reservatório dura uma noite e o aparelho desliga sozinho quando a água acaba.'],
+    ['Orders ship within 1-3 business days and usually arrive in 7-12 business days. You get a tracking link by email.', 'Os pedidos são enviados em 1 a 3 dias úteis e normalmente chegam em 7 a 12 dias úteis. Você recebe o rastreio por e-mail.'],
+    ['30 days. If you are not happy with your Motor Scent, contact us and we sort it out.', '30 dias. Se você não ficar satisfeito com seu Motor Scent, entre em contato para resolvermos.'],
+    ['Shipping & Delivery', 'Envio e entrega'], ['Free Shipping', 'Frete grátis'], ['Shipping Protection', 'Proteção de envio'],
+    ['Protect your order from potential damage, loss, or theft during shipping', 'Proteja seu pedido contra danos, perda ou roubo durante o envio'],
+    ['Covers loss, theft or damage in transit. We ship a replacement for free.', 'Cobre perda, roubo ou danos no transporte. Enviamos uma reposição gratuitamente.'],
+    ['Cart reserved for', 'Carrinho reservado por'], ['Cart • 0 Item', 'Carrinho • 0 item'], ['Your cart is empty', 'Seu carrinho está vazio'],
+    ['Continue shopping', 'Continuar comprando'], ['Check out', 'Finalizar compra'], ['Payment methods', 'Formas de pagamento'],
+    ['Regular price', 'Preço normal'], ['Sale price', 'Preço promocional'], ['Unit price', 'Preço unitário'], ['Total amount', 'Valor total'], ['You save', 'Você economiza'],
+    ['Product variants', 'Variações do produto'], ['View full details', 'Ver todos os detalhes'], ['Search', 'Buscar'], ['Menu', 'Menu'], ['Home', 'Início'], ['Contact', 'Contato'],
+    ['Privacy policy', 'Política de privacidade'], ['Cookie preferences', 'Preferências de cookies'], ['Log in', 'Entrar'], ['Have an account?', 'Já tem uma conta?'], ['Catalog', 'Catálogo'],
+    ['Loading...', 'Carregando...'], ["Couldn't load pickup availability", 'Não foi possível carregar a disponibilidade de retirada'],
+    ['Real homes, real mist', 'Casas reais, névoa de verdade'], ['Photos from customers across the 18 models.', 'Fotos de clientes com os 18 modelos.'], ['by 300+ car lovers', 'por mais de 300 apaixonados por carros'],
+    ['Rated 4.8/5', 'Avaliado em 4,8/5'], ['Excellent', 'Excelente'], ['Trustpilot Reviews', 'Avaliações Trustpilot'],
+    ['Better in person', 'Ainda melhor ao vivo'], ['Better than the TV', 'Melhor do que a TV'], ['Looks wild at night', 'Fica incrível à noite'],
+    ['Desk upgrade', 'Um novo nível para sua mesa'], ['Office conversation starter', 'Assunto garantido no escritório'], ['Perfect gift for car guys', 'Presente perfeito para quem ama carros'],
+    ['Looks like a display piece', 'Parece uma peça de exposição'], ['Kitchen counter truck', 'Caminhonete para a bancada'], ['Windowsill hero', 'Destaque na janela'],
+    ['Bought it as a gift and kept it. Fills the kitchen with a light mist in the morning.', 'Comprei de presente e acabei ficando. Enche a cozinha com uma névoa suave pela manhã.'],
+    ['Bought the Green V12 for my brother. Feels like a display piece, not a toy. Two of his friends already asked where it came from.', 'Comprei o V12 verde para meu irmão. Parece uma peça de exposição, não um brinquedo. Dois amigos dele já perguntaram onde ele comprou.'],
+    ['Cannon mist is insane', 'A névoa saindo do canhão é incrível'], ['Didn\'t expect the humidifier part to work this well. At night it looks unreal.', 'Não esperava que a função de umidificador funcionasse tão bem. À noite fica impressionante.'],
+    ['Got the Black GT. Lights plus exhaust mist on my desk after 9pm is the reason I bought it. Photos do not do it justice.', 'Comprei o GT preto. As luzes e a névoa no escapamento sobre minha mesa à noite foram o motivo da compra. As fotos não fazem justiça.'],
+    ['Got the Green V12 for my boyfriend. He has not stopped showing it to people.', 'Comprei o V12 verde para meu namorado. Ele não para de mostrar para todo mundo.'],
+    ['Looks way better in person. Lights on, mist running, my desk finally has a centerpiece.', 'Ao vivo é muito melhor. Com as luzes acesas e a névoa saindo, minha mesa finalmente tem um destaque.'],
+    ['On my desk at work. Three colleagues have ordered one since.', 'Está na minha mesa no trabalho. Três colegas já pediram um desde então.'],
+    ['Orange against the window light looks unreal. Mist works great with the lavender oil.', 'O modelo laranja contra a luz da janela fica incrível. A névoa funciona muito bem com óleo de lavanda.'],
+    ['Parked on the TV stand. Guests ask about it before they ask about the TV.', 'Fica sobre o rack da TV. As visitas perguntam dele antes de perguntarem da televisão.'],
+    ['Pour water into the hidden tank, press the button once and the ultrasonic plate turns it into cool mist that rolls out of the exhaust. No heat, no smell, safe on any desk.', 'Coloque água no reservatório escondido, aperte o botão uma vez e a placa ultrassônica a transforma em névoa fria que sai pelo escapamento. Sem calor, sem cheiro e segura para qualquer mesa.'],
+    ['Runs on my nightstand every evening. The light bar and the mist are honestly calming.', 'Funciona no meu criado-mudo todas as noites. A barra de luz e a névoa são realmente relaxantes.'],
+    ['Sits next to my keyboard all day. The mist out of the exhaust gets a comment from everyone on video calls.', 'Fica ao lado do meu teclado o dia todo. A névoa saindo do escapamento chama a atenção de todos nas videochamadas.'],
+    ['The tank fires mist from the barrel. My setup finally has something nobody else has.', 'O reservatório solta névoa pelo cano. Meu setup finalmente tem algo que ninguém mais tem.'],
+    ['Took the spot between my books. The green paint is exactly like the photos.', 'Ficou no espaço entre meus livros. A pintura verde é exatamente como nas fotos.'],
+    ['Two bottles of lavender oil. A few drops in the tank and the exhaust mist smells amazing.', 'Duas garrafas de óleo de lavanda. Algumas gotas no reservatório e a névoa do escapamento fica com um aroma incrível.'],
+    ['Was not sure it would look like the photos. The bodywork is cleaner than I expected and the mist with the lights on is the whole show.', 'Não tinha certeza se seria igual às fotos. O acabamento é melhor do que eu esperava e a névoa com as luzes acesas é o grande destaque.'],
+    ['Ordered', 'Pedido realizado'], ['Shipped', 'Enviado'], ['Delivered', 'Entregue'], ['Processing:', 'Processamento:'], ['Delivery:', 'Entrega:'], ['Tracking:', 'Rastreamento:'],
+    ['sent by email as soon as your order ships', 'enviado por e-mail assim que seu pedido for postado'], ['Every Motor Scent is checked before it leaves the warehouse.', 'Todo Motor Scent é revisado antes de sair do estoque.']
   ]);
   const translate = root => {
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: node => /^(SCRIPT|STYLE)$/i.test(node.parentElement?.tagName) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
-    for (let node; node = walker.nextNode();) { let value = node.nodeValue; translations.forEach((to, from) => { value = value.replaceAll(from, to); }); node.nodeValue = value; }
+    const localize = value => { translations.forEach((to, from) => { value = value.replaceAll(from, to); }); return value.replace(/\$99\.95/g, 'R$ 139,90').replace(/1-3 business days/g, '1 a 3 dias úteis').replace(/7-12 business days \(varies by location\)/g, '7 a 12 dias úteis (varia conforme a região)').replace(/Open media (\d+) in modal/g, 'Abrir mídia $1 no modal').replace(/Opens in a new window\./g, 'Abre em uma nova janela.').replace(/Model: /g, 'Modelo: '); };
+    for (let node; node = walker.nextNode();) node.nodeValue = localize(node.nodeValue);
+    root.querySelectorAll('[aria-label],[title],[alt],[placeholder]').forEach(element => ['aria-label','title','alt','placeholder'].forEach(attribute => { if (element.hasAttribute(attribute)) element.setAttribute(attribute, localize(element.getAttribute(attribute))); }));
   };
   const selectedVariant = () => document.querySelector('input[name="id"]:checked, select[name="id"] option:checked')?.textContent?.trim() || document.querySelector('[name="id"]')?.value || 'Motor Scent';
   const selectedImage = () => document.querySelector('[data-media-id] img, .product__media img, .product-media img')?.getAttribute('src') || 'motorscent-assets/images/motor-scent-gt3.png';
   const updateOffer = () => {
     const quantity = Math.max(1, Number(document.querySelector('[name="quantity"]')?.value || 1));
     const unit = priceFor(quantity), total = unit * quantity;
-    document.querySelectorAll('.price, .product__price, [data-price]').forEach(element => { if (element.children.length === 0) element.textContent = brl(total); });
+    document.querySelectorAll('.main-price, .sticky-atc__price .price-item--sale').forEach(element => { element.textContent = brl(total); });
+    document.querySelectorAll('.price__compare-price, .price__badge-sale').forEach(element => { element.style.display = 'none'; });
+    document.querySelectorAll('.quantity-break').forEach(card => {
+      const units = Number(card.dataset.quantity || 1), tier = priceFor(units), cardTotal = tier * units;
+      const label = card.querySelector('.quantity-break__label-text'); if (label) label.textContent = units === 1 ? '1 unidade' : units === 2 ? '2 unidades' : '3 unidades ou mais';
+      const caption = card.querySelector('.quantity-break__caption'); if (caption) caption.textContent = `${brl(tier)} por unidade`;
+      const price = card.querySelector('.quantity-break__price'); if (price) price.textContent = brl(cardTotal);
+      const compare = card.querySelector('.quantity-break__compare-price'); if (compare) compare.style.display = 'none';
+    });
     let note = document.querySelector('#motorscent-local-offer');
     if (!note) { note = document.createElement('p'); note.id = 'motorscent-local-offer'; note.style.cssText = 'font-weight:700;margin:12px 0;color:#111'; const anchor = document.querySelector('form[action*="cart/add"], form.shopify-product-form'); anchor?.prepend(note); }
     if (note) note.textContent = quantity === 1 ? '1 unidade por R$ 139,90' : quantity === 2 ? '2 unidades por R$ 129,90 cada' : `${quantity} unidades por R$ 99,90 cada`;
