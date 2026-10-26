@@ -42,6 +42,7 @@ main > section:not(:first-child),
 .upsell__container { min-width: 0; }
 .upsell__content, .upsell__title { min-width: 0; }
 .upsell__title h3, .upsell__desc { overflow-wrap: anywhere; }
+.product-info-upsell[data-handle="shipping-protection"] { display: none !important; }
 @media screen and (min-width: 750px) and (max-width: 1100px) {
   .page-width, .page-width-desktop { padding-left: 24px !important; padding-right: 24px !important; }
   .product--large, .product--medium { gap: 28px !important; }
