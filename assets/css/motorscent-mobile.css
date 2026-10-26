@@ -30,6 +30,12 @@ main > section:not(:first-child),
 .motorscent-shipping-results th { background: #f6f6f6; }
 .motorscent-shipping-results td:last-child strong { color: #168a5b; }
 .motorscent-shipping-results p { margin: 10px 0 0; color: #555; font-size: 12px; }
+.motorscent-delivery-card { display: flex; align-items: center; gap: 12px; margin-top: 18px; padding: 13px 14px; border: 1px solid #dedede; border-radius: 6px; }
+.motorscent-delivery-card p { margin: 0; line-height: 1.35; font-size: 14px; }
+.motorscent-delivery-card p > strong { color: #16bd80; font-size: 15px; }
+.motorscent-delivery-card p > span { color: #555; }
+.motorscent-delivery-icon { flex: 0 0 49px; width: 49px; height: 49px; display: grid; place-items: center; border-radius: 50%; background: #0cbbe7; color: #fff; font-size: 25px; line-height: 1; }
+.motorscent-delivery-icon--return { background: #16c789; font-size: 27px; }
 
 @media screen and (max-width: 749px) {
   .page-width,

@@ -137,12 +137,14 @@
     const section = document.createElement('section');
     section.id = 'motorscent-shipping-estimator';
     section.className = 'motorscent-shipping-estimator';
-    section.innerHTML = `<h2>Calcule o frete e o prazo de entrega</h2><div class="motorscent-shipping-form"><label class="visually-hidden" for="motorscent-zip">CEP</label><input id="motorscent-zip" inputmode="numeric" autocomplete="postal-code" maxlength="9" placeholder="Digite seu CEP"><button type="button">Calcular</button></div><p class="motorscent-shipping-message" aria-live="polite"></p><div class="motorscent-shipping-results" hidden><table><thead><tr><th>Entrega</th><th>Prazo</th><th>Preço</th></tr></thead><tbody><tr><td><strong>Padrão</strong></td><td>8 a 11 dias</td><td><strong>Grátis</strong></td></tr><tr><td><strong>Expresso</strong></td><td>5 a 7 dias</td><td><strong>R$ 9,79</strong></td></tr></tbody></table><p>O frete padrão grátis será aplicado no checkout.</p></div>`;
+    section.innerHTML = `<h2>Calcule o envio e o prazo de entrega</h2><div class="motorscent-shipping-form"><label class="visually-hidden" for="motorscent-zip">CEP</label><input id="motorscent-zip" inputmode="numeric" autocomplete="postal-code" maxlength="9" placeholder="Digite seu CEP"><button type="button">Calcular</button></div><p class="motorscent-shipping-message" aria-live="polite"></p><div class="motorscent-shipping-results" hidden><table><thead><tr><th>Entrega</th><th>Prazo</th><th>Preço</th></tr></thead><tbody><tr><td><strong>Padrão</strong></td><td>8 a 11 dias úteis</td><td><strong>Grátis</strong></td></tr><tr><td><strong>Expresso</strong></td><td>5 a 7 dias úteis</td><td><strong>R$ 9,79</strong></td></tr></tbody></table><p>O frete padrão grátis será aplicado no checkout.</p></div><div class="motorscent-delivery-card"><span class="motorscent-delivery-icon" aria-hidden="true">🚚</span><p><strong>Frete grátis</strong> <span data-shipping-location>para sua região</span><br><span>Prazo de envio de 2 a 5 dias úteis</span></p></div><div class="motorscent-delivery-card"><span class="motorscent-delivery-icon motorscent-delivery-icon--return" aria-hidden="true">▣</span><p><strong>Devolução garantida</strong><br><span>Dinheiro de volta em até 7 dias</span></p></div>`;
     form.after(section);
     const input = section.querySelector('input');
     const button = section.querySelector('button');
     const message = section.querySelector('.motorscent-shipping-message');
     const results = section.querySelector('.motorscent-shipping-results');
+    const locationLabel = section.querySelector('[data-shipping-location]');
+    const setLocation = (city, state) => { locationLabel.textContent = city ? `para ${city}${state ? `, ${state}` : ''} e região` : 'para sua região'; };
     const calculate = async () => {
       const zip = input.value.replace(/\D/g, '');
       input.value = zip.replace(/(\d{5})(\d)/, '$1-$2');
@@ -155,6 +157,7 @@
         if (!response.ok || address.erro) throw new Error('CEP inválido');
         const location = [address.localidade, address.uf].filter(Boolean).join(' / ');
         message.textContent = `Entrega para ${location}.`;
+        setLocation(address.localidade, address.uf);
         results.hidden = false;
         localStorage.setItem('motorscent_shipping_v1', JSON.stringify({ zip, city: address.localidade || '', state: address.uf || '', method: 'standard' }));
       } catch {
@@ -163,9 +166,25 @@
     };
     input.addEventListener('input', () => { input.value = input.value.replace(/\D/g, '').slice(0, 8).replace(/(\d{5})(\d)/, '$1-$2'); if (input.value.replace(/\D/g, '').length === 8) calculate(); });
     button.addEventListener('click', calculate);
-    try { const saved = JSON.parse(localStorage.getItem('motorscent_shipping_v1') || 'null'); if (saved?.zip) { input.value = saved.zip.replace(/(\d{5})(\d)/, '$1-$2'); calculate(); } } catch {}
+    const stateCodes = { 'Acre':'AC', 'Alagoas':'AL', 'Amapá':'AP', 'Amazonas':'AM', 'Bahia':'BA', 'Ceará':'CE', 'Distrito Federal':'DF', 'Espírito Santo':'ES', 'Goiás':'GO', 'Maranhão':'MA', 'Mato Grosso':'MT', 'Mato Grosso do Sul':'MS', 'Minas Gerais':'MG', 'Pará':'PA', 'Paraíba':'PB', 'Paraná':'PR', 'Pernambuco':'PE', 'Piauí':'PI', 'Rio de Janeiro':'RJ', 'Rio Grande do Norte':'RN', 'Rio Grande do Sul':'RS', 'Rondônia':'RO', 'Roraima':'RR', 'Santa Catarina':'SC', 'São Paulo':'SP', 'Sergipe':'SE', 'Tocantins':'TO' };
+    const detectLocation = async () => {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 3500);
+      try {
+        const response = await fetch('https://ipwho.is/', { signal: controller.signal });
+        const location = await response.json();
+        if (response.ok && location.success !== false && location.country_code === 'BR') setLocation(location.city, stateCodes[location.region] || location.region);
+      } catch {} finally { clearTimeout(timeout); }
+    };
+    try { const saved = JSON.parse(localStorage.getItem('motorscent_shipping_v1') || 'null'); if (saved?.zip) { input.value = saved.zip.replace(/(\d{5})(\d)/, '$1-$2'); calculate(); } else detectLocation(); } catch { detectLocation(); }
   };
-  document.addEventListener('DOMContentLoaded', () => { document.documentElement.lang = 'pt-BR'; translate(document.body); optimizeImages(); addPaymentNote(); addShippingEstimator(); updateOffer(); document.querySelectorAll('[name="quantity"]').forEach(input => input.addEventListener('change', updateOffer)); }, { once: true });
+  const localizeDeliveryDates = () => {
+    const format = date => new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', day: '2-digit', month: 'short' }).format(date).replace('.', '');
+    const future = days => { const date = new Date(); date.setDate(date.getDate() + days); return date; };
+    const labels = [format(future(0)), `${format(future(1))} a ${format(future(3))}`, `${format(future(8))} a ${format(future(14))}`];
+    document.querySelectorAll('.shipping-checkpoint__top').forEach((element, index) => { if (labels[index]) element.innerHTML = `<strong>${labels[index]}</strong>`; });
+  };
+  document.addEventListener('DOMContentLoaded', () => { document.documentElement.lang = 'pt-BR'; translate(document.body); optimizeImages(); addPaymentNote(); addShippingEstimator(); localizeDeliveryDates(); setTimeout(localizeDeliveryDates, 700); updateOffer(); document.querySelectorAll('[name="quantity"]').forEach(input => input.addEventListener('change', updateOffer)); }, { once: true });
   document.addEventListener('submit', goToCheckout, true);
   document.addEventListener('click', event => { const link = event.target instanceof Element && event.target.closest('a[href*="/cart"], a[href*="/checkout"]'); if (!link) return; event.preventDefault(); const form = document.querySelector('form[action*="cart/add"], form.shopify-product-form'); if (form) goToCheckout({ target: form, preventDefault() {}, stopImmediatePropagation() {} }); }, true);
 })();
