@@ -25,6 +25,7 @@
     replaceText(document.body, 'Prazo de envio de 2 a 5 dias', 'Entrega estimada de 5 a 7 dias corridos');
     replaceText(document.body, 'Aceitamos Cartão, PIX e Boleto.', 'Aceitamos cartão de crédito, Pix e saldo Mercado Pago.');
     replaceText(document.body, '10% OFF no pix + Envio Imediato', 'Pix, cartão e saldo Mercado Pago');
+    document.querySelectorAll('.product-pix').forEach(element => { element.textContent = 'Pix, cartão e saldo Mercado Pago'; });
     document.querySelectorAll('[aria-labelledby="pi-boleto"]').forEach(icon => icon.closest('.payment-icon')?.remove());
     const paymentOptions = document.getElementById('modal-open-button');
     if (paymentOptions) {
