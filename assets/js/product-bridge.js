@@ -1,7 +1,7 @@
 (() => {
   const CART_KEY = 'chefpro_cart_v1';
   const product = { id: 'chefpro-2l', title: 'Triturador Elétrico ChefPro 2L Bivolt + Tábua de Madeira Grátis', price: 49.90, image: 'https://lojamaxlarapp.com/cdn/shop/files/6_700x_e3bfb5c3-31ad-4db8-8622-d66c1ed366f3.webp?v=1789224097' };
-  const pixPrice = 80.91;
+  const pixPrice = 49.90;
   const loadPixel = callback => {
     if (window.MetaPixel) return callback();
     window.addEventListener('meta-pixel-ready', callback, { once: true });
@@ -24,6 +24,7 @@
     }
     replaceText(document.body, 'Prazo de envio de 2 a 5 dias', 'Entrega estimada de 5 a 7 dias corridos');
     replaceText(document.body, 'Aceitamos Cartão, PIX e Boleto.', 'Aceitamos cartão de crédito, Pix e saldo Mercado Pago.');
+    replaceText(document.body, '10% OFF no pix + Envio Imediato', 'Pix, cartão e saldo Mercado Pago');
     document.querySelectorAll('[aria-labelledby="pi-boleto"]').forEach(icon => icon.closest('.payment-icon')?.remove());
     const paymentOptions = document.getElementById('modal-open-button');
     if (paymentOptions) {
