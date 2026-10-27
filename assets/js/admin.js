@@ -7,7 +7,7 @@
   const escape = value => String(value ?? '').replace(/[&<>'"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[char]);
   const iso = value => value.toISOString().slice(0, 10);
   const defaultPeriods = () => { const end = new Date(); end.setHours(0, 0, 0, 0); const start = new Date(end); start.setDate(start.getDate() - 29); const previousEnd = new Date(start); previousEnd.setDate(previousEnd.getDate() - 1); const previousStart = new Date(previousEnd); previousStart.setDate(previousStart.getDate() - 29); return { currentStart: iso(start), currentEnd: iso(end), previousStart: iso(previousStart), previousEnd: iso(previousEnd) }; };
-  const state = { data: null };
+  const state = { data: null, token: sessionStorage.getItem('admin_dashboard_token') || '' };
 
   function setPeriods(values = defaultPeriods()) { Object.entries(values).forEach(([key, value]) => { $(`#${key}`).value = value; }); }
   function currentPeriods() { return { currentStart: $('#currentStart').value, currentEnd: $('#currentEnd').value, previousStart: $('#previousStart').value, previousEnd: $('#previousEnd').value }; }
@@ -35,6 +35,10 @@
     $('#installments').innerHTML = data.current.installments.length ? `<strong>Parcelas aprovadas</strong>${data.current.installments.map(item => `<span>${item.installments}x · ${item.orders}</span>`).join('')}` : '';
   }
 
+  function renderProducts(data) {
+    $('#products').innerHTML = data.current.products.map(item => `<div class="method-row"><span>${escape(item.name)}<small>${item.approved} aprovado(s) · ${item.pending} pendente(s) · ${item.failed} não realizado(s)</small></span><b>${money(item.revenue)}</b></div>`).join('');
+  }
+
   function renderCampaigns(data) {
     const campaigns = data.campaigns.current;
     if (!campaigns.connected) { $('#campaigns').innerHTML = `<p class="campaign-empty">${escape(campaigns.reason)} Este painel continuará mostrando as vendas do Mercado Pago normalmente.</p>`; return; }
@@ -53,10 +57,16 @@
   function renderRecommendations(data) { $('#recommendations').innerHTML = data.recommendations.map(item => `<li class="priority-${item.priority}"><b>${escape(item.title)}</b><span>${escape(item.detail)}</span></li>`).join(''); }
   function renderIntegrations(data) { const labels = { mercadoPago: 'Mercado Pago', webhook: 'Webhook assinado', metaCapi: 'Meta CAPI', metaAds: 'Meta Ads Insights', firstPartyFunnelStorage: 'Banco de funil próprio' }; $('#integrations').innerHTML = Object.entries(labels).map(([key, label]) => `<div class="integration"><span>${label}</span><b class="${data.integrations[key] ? 'ok' : 'pending'}">${data.integrations[key] ? 'Conectado' : 'Pendente'}</b></div>`).join(''); }
   function renderOrders(data) { const orders = data.current.recent; $('#orders').innerHTML = orders.length ? orders.map(item => `<tr><td>${time(item.createdAt)}</td><td>${escape(item.id)}</td><td>${escape(item.method.replaceAll('_', ' '))}</td><td>${item.installments}x</td><td><span class="badge badge-${escape(item.status)}">${escape(item.status)}</span></td><td>${money(item.amount)}</td></tr>`).join('') : '<tr><td colspan="6">Nenhuma tentativa de pagamento no período selecionado.</td></tr>'; }
+  function renderContacts(data) {
+    const detail = data.contacts;
+    if (!detail.enabled) { $('#contactsNotice').textContent = detail.configured ? 'Informe a chave de administrador para consultar contatos.' : 'Defina ADMIN_DASHBOARD_TOKEN no ambiente da Vercel para habilitar dados de clientes com segurança.'; $('#contacts').innerHTML = '<tr><td colspan="7">Dados de contato protegidos.</td></tr>'; return; }
+    $('#contactsNotice').textContent = `${detail.records.length} registro(s) no período selecionado. Dados de cartão, CPF e endereço não são armazenados neste painel.`;
+    $('#contacts').innerHTML = detail.records.length ? detail.records.map(item => `<tr><td>${time(item.createdAt)}</td><td>${escape(item.product)}</td><td>${escape(item.name)}</td><td><a href="mailto:${encodeURIComponent(item.email)}">${escape(item.email)}</a></td><td>${escape(item.phone)}</td><td><span class="badge badge-${escape(item.status)}">${escape(item.status)}</span></td><td>${money(item.amount)}</td></tr>`).join('') : '<tr><td colspan="7">Nenhuma tentativa de pagamento no período selecionado.</td></tr>';
+  }
 
   function render(data) {
     state.data = data;
-    renderMetrics(data); renderChart(data.current.daily); renderPayments(data); renderCampaigns(data); renderFunnel(data); renderRecommendations(data); renderIntegrations(data); renderOrders(data);
+    renderMetrics(data); renderChart(data.current.daily); renderPayments(data); renderProducts(data); renderCampaigns(data); renderFunnel(data); renderRecommendations(data); renderIntegrations(data); renderOrders(data); renderContacts(data);
     $('#updated').textContent = `Atualizado em ${time(data.generatedAt)} · Vendas consultadas diretamente no Mercado Pago.`;
     $('#limitations').textContent = data.limitations.join(' ');
   }
@@ -66,7 +76,8 @@
     const params = new URLSearchParams({ current_start: periods.currentStart, current_end: periods.currentEnd, previous_start: periods.previousStart, previous_end: periods.previousEnd });
     $('#refresh').disabled = true; $('#refresh').textContent = 'Atualizando…'; $('#updated').textContent = 'Consultando dados de vendas…';
     try {
-      const response = await fetch(`/api/admin/overview?${params}`, { cache: 'no-store' });
+      const headers = state.token ? { 'X-Admin-Token': state.token } : {};
+      const response = await fetch(`/api/admin/overview?${params}`, { cache: 'no-store', headers });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Não foi possível carregar o painel.');
       render(data);
@@ -78,5 +89,8 @@
   setPeriods();
   $('#periodForm').addEventListener('submit', event => { event.preventDefault(); load(); });
   $('#refresh').addEventListener('click', load);
+  $('#adminToken').value = state.token;
+  $('#saveAdminToken').addEventListener('click', () => { state.token = $('#adminToken').value.trim(); if (state.token) sessionStorage.setItem('admin_dashboard_token', state.token); else sessionStorage.removeItem('admin_dashboard_token'); load(); });
+  $('#clearAdminToken').addEventListener('click', () => { state.token = ''; $('#adminToken').value = ''; sessionStorage.removeItem('admin_dashboard_token'); load(); });
   load();
 })();

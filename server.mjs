@@ -67,7 +67,14 @@ async function processPayment(req, res) {
       issuer_id: form.issuer_id,
       payer: { ...form.payer, email },
       external_reference: orderId,
-      metadata: { product_id: product.id, quantity, lavender_oil: lavenderOil, customer_name: String(body.customer?.name || '').slice(0, 120) }
+      metadata: {
+        product_id: product.id,
+        quantity,
+        lavender_oil: lavenderOil,
+        customer_name: String(body.customer?.name || '').slice(0, 120),
+        customer_email: email.slice(0, 160),
+        customer_phone: String(body.customer?.phone || '').replace(/\D/g, '').slice(0, 15)
+      }
     };
     Object.keys(payload).forEach(key => payload[key] === undefined && delete payload[key]);
     if (config.publicBaseUrl) payload.notification_url = `${config.publicBaseUrl}/api/mercadopago/webhook`;

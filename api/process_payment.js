@@ -40,7 +40,14 @@ export default async function handler(request, response) {
     issuer_id: formData.issuer_id,
     payer: { ...formData.payer, email },
     external_reference: orderId,
-    metadata: { product_id: product.id, quantity, lavender_oil: lavenderOil, customer_name: String(customer.name || '').slice(0, 120) }
+    metadata: {
+      product_id: product.id,
+      quantity,
+      lavender_oil: lavenderOil,
+      customer_name: String(customer.name || '').slice(0, 120),
+      customer_email: email.slice(0, 160),
+      customer_phone: String(customer.phone || '').replace(/\D/g, '').slice(0, 15)
+    }
   };
   // Cartão gera token; alguns meios (como Pix) não o utilizam.
   Object.keys(payload).forEach(key => payload[key] === undefined && delete payload[key]);

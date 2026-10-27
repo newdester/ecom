@@ -31,6 +31,7 @@
       </section>
 
       <p class="updated" id="updated" aria-live="polite"></p>
+      <section class="card admin-access"><div><p class="eyebrow">Dados de clientes</p><h2>Acesso protegido</h2><p class="muted">Use a chave definida no ambiente para visualizar nome, e-mail e telefone. CPF, endereço e dados de cartão não são exibidos.</p></div><div class="access-form"><label for="adminToken">Chave do painel</label><input id="adminToken" type="password" autocomplete="off" placeholder="Informe a chave de administrador"><button id="saveAdminToken" type="button">Liberar dados</button><button id="clearAdminToken" type="button" class="secondary">Ocultar dados</button></div><p class="updated" id="accessStatus" aria-live="polite"></p></section>
       <section class="metrics" id="metrics"></section>
 
       <section class="grid grid-two">
@@ -44,11 +45,13 @@
       </section>
 
       <section class="grid grid-wide">
+        <article class="card"><p class="eyebrow">Produtos</p><h2>Resultados por oferta</h2><div id="products"></div></article>
         <article class="card"><p class="eyebrow">Otimizações prioritárias</p><h2>Próximas ações</h2><ol class="recommendations" id="recommendations"></ol></article>
         <article class="card"><p class="eyebrow">Integrações</p><h2>Saúde operacional</h2><div class="integration-list" id="integrations"></div></article>
       </section>
 
       <section class="card orders"><p class="eyebrow">Últimas tentativas</p><h2>Atividade de pagamentos</h2><div class="table-wrap"><table><thead><tr><th>Horário</th><th>Referência</th><th>Meio</th><th>Parcelas</th><th>Status</th><th>Valor</th></tr></thead><tbody id="orders"></tbody></table></div><p class="muted">A lista é propositalmente anonimizada: nenhum dado pessoal do comprador aparece no painel.</p></section>
+      <section class="card orders"><p class="eyebrow">Clientes e pedidos</p><h2>Contato de tentativas e vendas</h2><div id="contactsNotice" class="muted"></div><div class="table-wrap"><table><thead><tr><th>Horário</th><th>Produto</th><th>Cliente</th><th>E-mail</th><th>Telefone</th><th>Status</th><th>Valor</th></tr></thead><tbody id="contacts"></tbody></table></div></section>
       <p class="footnote" id="limitations"></p>
     </section>
   </main>

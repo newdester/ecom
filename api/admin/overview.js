@@ -1,3 +1,4 @@
+import { timingSafeEqual } from 'node:crypto';
 import { rateLimit, sendRateHeaders } from '../_lib/rate-limit.js';
 
 const PRODUCT_ID = 'chefpro-2l';
@@ -46,7 +47,29 @@ function periodFrom(query) {
 function belongsToStore(payment) {
   const reference = String(payment.external_reference || '');
   const fingerprint = [reference, payment.description, payment.metadata?.product_id].join(' ').toLowerCase();
-  return reference.startsWith('CP-') || fingerprint.includes(PRODUCT_ID) || fingerprint.includes('chefpro');
+  return reference.startsWith('CP-') || fingerprint.includes(PRODUCT_ID) || fingerprint.includes('chefpro') || fingerprint.includes('motor-scent');
+}
+
+function productFor(payment) {
+  const value = String(payment.metadata?.product_id || '').toLowerCase();
+  if (value === 'motor-scent' || /motor scent/i.test(String(payment.description || ''))) return { id: 'motor-scent', name: 'Motor Scent' };
+  return { id: 'chefpro-2l', name: 'Triturador ChefPro 2L' };
+}
+
+function contactFor(payment) {
+  const payer = payment.payer || {};
+  const metadata = payment.metadata || {};
+  const name = String(metadata.customer_name || [payer.first_name, payer.last_name].filter(Boolean).join(' ') || 'Não informado').trim().slice(0, 120);
+  const email = String(metadata.customer_email || payer.email || 'Não informado').trim().slice(0, 160);
+  const phone = String(metadata.customer_phone || payer.phone?.number || '').replace(/\D/g, '').slice(0, 15);
+  return { name, email, phone: phone || 'Não informado' };
+}
+
+function canViewContacts(request) {
+  const expected = String(process.env.ADMIN_DASHBOARD_TOKEN || '');
+  const received = String(request.headers['x-admin-token'] || '');
+  if (!expected || !received || expected.length !== received.length) return false;
+  try { return timingSafeEqual(Buffer.from(expected), Buffer.from(received)); } catch { return false; }
 }
 
 function publicMethod(payment) {
@@ -101,6 +124,7 @@ function aggregate(payments, range) {
     days.set(isoDate(day), { date: isoDate(day), revenue: 0, approved: 0, attempts: 0 });
   }
   const methods = { pix: { orders: 0, revenue: 0 }, cartao: { orders: 0, revenue: 0 }, saldo_mercado_pago: { orders: 0, revenue: 0 }, outro: { orders: 0, revenue: 0 } };
+  const products = { 'chefpro-2l': { id: 'chefpro-2l', name: 'Triturador ChefPro 2L', attempts: 0, approved: 0, pending: 0, failed: 0, revenue: 0 }, 'motor-scent': { id: 'motor-scent', name: 'Motor Scent', attempts: 0, approved: 0, pending: 0, failed: 0, revenue: 0 } };
   const installments = Array.from({ length: 12 }, (_, index) => ({ installments: index + 1, orders: 0 }));
   const totals = { attempts: 0, approved: 0, pending: 0, failed: 0, other: 0, revenue: 0, refunded: 0, pendingValue: 0 };
   const safePayments = payments.sort((left, right) => new Date(right.date_created) - new Date(left.date_created));
@@ -112,13 +136,18 @@ function aggregate(payments, range) {
     const amount = brl(payment.transaction_amount);
     const status = statusBucket(payment.status);
     const method = publicMethod(payment);
+    const product = productFor(payment);
+    const productTotals = products[product.id];
     totals.attempts += 1;
     totals[status] += 1;
+    productTotals.attempts += 1;
+    productTotals[status] += 1;
     if (day) day.attempts += 1;
     if (status === 'approved') {
       const refunded = brl(payment.transaction_amount_refunded);
       totals.revenue = brl(totals.revenue + amount - refunded);
       totals.refunded = brl(totals.refunded + refunded);
+      productTotals.revenue = brl(productTotals.revenue + amount - refunded);
       methods[method].orders += 1;
       methods[method].revenue = brl(methods[method].revenue + amount - refunded);
       if (day) { day.approved += 1; day.revenue = brl(day.revenue + amount - refunded); }
@@ -134,13 +163,32 @@ function aggregate(payments, range) {
     methods: Object.entries(methods).map(([method, values]) => ({ method, ...values })),
     installments: installments.filter(item => item.orders > 0),
     daily: [...days.values()],
+    products: Object.values(products),
     recent: safePayments.slice(0, 10).map(payment => ({
       id: maskedId(payment),
       createdAt: dateTime(payment.date_created || payment.date_last_updated || new Date()),
       status: payment.status || 'unknown',
       method: publicMethod(payment),
       installments: Math.min(12, Math.max(1, Number.parseInt(payment.installments, 10) || 1)),
-      amount: brl(payment.transaction_amount)
+      amount: brl(payment.transaction_amount),
+      product: productFor(payment).name
+    }))
+  };
+}
+
+function contacts(payments, enabled) {
+  if (!enabled) return { enabled: false, configured: Boolean(process.env.ADMIN_DASHBOARD_TOKEN), records: [] };
+  return {
+    enabled: true,
+    configured: true,
+    records: payments.slice(0, 100).map(payment => ({
+      ...contactFor(payment),
+      product: productFor(payment).name,
+      createdAt: dateTime(payment.date_created || payment.date_last_updated || new Date()),
+      status: payment.status || 'unknown',
+      method: publicMethod(payment),
+      amount: brl(payment.transaction_amount),
+      orderId: String(payment.external_reference || payment.id || '').slice(0, 80)
     }))
   };
 }
@@ -208,7 +256,7 @@ export default async function handler(request, response) {
     const integrations = {
       mercadoPago: Boolean(process.env.MP_ACCESS_TOKEN), webhook: Boolean(process.env.MP_WEBHOOK_SECRET),
       metaCapi: Boolean(process.env.META_PIXEL_ID && process.env.META_ACCESS_TOKEN),
-      metaAds: currentCampaigns.connected, firstPartyFunnelStorage: false
+      metaAds: currentCampaigns.connected, firstPartyFunnelStorage: false, customerRecords: Boolean(process.env.ADMIN_DASHBOARD_TOKEN)
     };
     response.setHeader('Cache-Control', 'no-store');
     return response.status(200).json({
@@ -216,7 +264,8 @@ export default async function handler(request, response) {
       comparison: { revenue: change(current.totals.revenue, previous.totals.revenue), approved: change(current.totals.approved, previous.totals.approved), attempts: change(current.totals.attempts, previous.totals.attempts) },
       campaigns: { current: currentCampaigns, previous: previousCampaigns }, integrations,
       funnel: { available: false, trackedEvents: ['PageView', 'ViewContent', 'AddToCart', 'InitiateCheckout', 'AddPaymentInfo', 'Purchase'] },
-      recommendations: recommendations(current, integrations), limitations: ['As vendas são filtradas por ChefPro/CP- e consultadas no Mercado Pago.', 'A API de pagamentos retorna até 12 meses de histórico.', 'O painel não expõe nome, CPF, e-mail, endereço, cartão ou chaves.']
+      contacts: contacts(currentPayments, canViewContacts(request)),
+      recommendations: recommendations(current, integrations), limitations: ['As duas ofertas são agrupadas por produto e consultadas diretamente no Mercado Pago.', 'A API de pagamentos retorna até 12 meses de histórico.', 'Nome, e-mail e telefone só ficam disponíveis após autenticação do administrador. CPF, endereço, cartão e chaves não são exibidos.']
     });
   } catch (error) {
     return response.status(502).json({ error: error.message || 'Não foi possível carregar os dados do painel.' });
